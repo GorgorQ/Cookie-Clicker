@@ -14,13 +14,13 @@ const handleClick = () => {
 
 <style scoped>
 .options-container {
-  width: 100%;
+  width: 80%;
   margin-bottom: 20px;
 }
 
 .options-btn {
   width: 100%;
-  padding: 12px 16px;
+  padding: 16px 20px;
   background: linear-gradient(135deg, #6c757d, #495057);
   border: 2px solid #495057;
   border-radius: 8px;
@@ -32,7 +32,8 @@ const handleClick = () => {
   align-items: center;
   gap: 8px;
   transition: all 0.3s ease;
-  font-size: 14px;
+  font-size: 16px;
+  min-height: 60px;
 }
 
 .options-btn:hover {

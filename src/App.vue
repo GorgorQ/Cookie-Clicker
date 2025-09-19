@@ -1,18 +1,20 @@
 <template>
   <div class="container">
     <section class="left">
+      <Connection />
       <Options />
-      <Achievements :cookies="count" :total-clicks="count" :upgrades="[]" />
+      <Ranking :cookies="count" :cps="cookiesPerSecond" :playerName="'You'" />
+      <Achievements :cookies="count" :totalClicks="totalClicks" :upgrades="currentUpgrades" />
     </section>
     <section class="center">
       <div class="cookies-stats">
         <p>Number of cookies {{ count }}</p>
         <p>Cookies per second: {{ cookiesPerSecond }}</p>
       </div>
-      <img class="cookie-btn" src="./assets/image.png" @click="count++" alt="Cookie">
+      <img class="cookie-btn" src="./assets/image.png" @click="handleCookieClick" alt="Cookie">
     </section>
     <section class="right">
-      <Upgrades :cookies="count" @buy-upgrade="buyUpgrade" @cps-update="updateCps" />
+      <Upgrades :cookies="count" @buy-upgrade="buyUpgrade" @cps-update="updateCps" @upgrades-update="updateUpgrades" />
     </section>
   </div>
 </template>
@@ -22,9 +24,18 @@ import { ref, onMounted, onUnmounted } from "vue"
 import Upgrades from "./components/Upgrades.vue"
 import Achievements from "./components/Achievements.vue"
 import Options from "./components/Options.vue"
+import Connection from "./components/Connection.vue"
+import Ranking from "./components/Ranking.vue"
 
 const count = ref(0)
 const cookiesPerSecond = ref(0)
+const totalClicks = ref(0)
+const currentUpgrades = ref([])
+
+const handleCookieClick = () => {
+  count.value++
+  totalClicks.value++
+}
 
 const buyUpgrade = (cost) => {
   count.value -= cost
@@ -32,6 +43,10 @@ const buyUpgrade = (cost) => {
 
 const updateCps = (newCps) => {
   cookiesPerSecond.value = newCps
+}
+
+const updateUpgrades = (upgrades) => {
+  currentUpgrades.value = upgrades
 }
 
 let interval = null

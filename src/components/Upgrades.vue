@@ -21,7 +21,7 @@ import { ref, computed, watch } from "vue"
 import UpgradeItem from './UpgradeItem.vue'
 
 const props = defineProps(['cookies'])
-const emit = defineEmits(['buy-upgrade', 'cps-update'])
+const emit = defineEmits(['buy-upgrade', 'cps-update', 'upgrades-update'])
 
 const upgrades = ref([
   {
@@ -126,6 +126,11 @@ const cookiesPerSecond = computed(() => {
 watch(cookiesPerSecond, (newCps) => {
   emit('cps-update', newCps)
 }, { immediate: true })
+
+// Émet les upgrades à chaque changement
+watch(upgrades, (newUpgrades) => {
+  emit('upgrades-update', newUpgrades)
+}, { deep: true, immediate: true })
 
 const buyUpgrade = (upgradeId) => {
   const upgrade = upgrades.value.find(u => u.id === upgradeId)

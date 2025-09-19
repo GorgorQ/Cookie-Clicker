@@ -1,5 +1,17 @@
 <template>
   <div class="achievements-container">
+    <!-- Notifications -->
+    <div class="notifications-container">
+      <div 
+        v-for="notification in notifications" 
+        :key="notification.id"
+        class="notification"
+        :class="{ 'fade-in': notification.show }"
+      >
+        {{ notification.icon }} {{ notification.message }}
+      </div>
+    </div>
+
     <button 
       @click="toggleDropdown" 
       class="achievements-btn"
@@ -31,11 +43,12 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 
 const props = defineProps(['cookies', 'totalClicks', 'upgrades'])
 
 const isOpen = ref(false)
+const notifications = ref([])
 
 const achievements = ref([
   {
@@ -56,14 +69,6 @@ const achievements = ref([
   },
   {
     id: 3,
-    name: "Millionnaire",
-    description: "Avoir 1,000,000 cookies",
-    icon: "💰",
-    unlocked: false,
-    condition: () => props.cookies >= 1000000
-  },
-  {
-    id: 4,
     name: "Grand-mère Adoptée",
     description: "Acheter 1 Grand-mère",
     icon: "👵",
@@ -71,23 +76,69 @@ const achievements = ref([
     condition: () => props.upgrades?.find(u => u.name === "Grandma")?.owned >= 1
   },
   {
-    id: 5,
+    id: 4,
     name: "Industriel",
     description: "Acheter 10 améliorations",
     icon: "🏭",
     unlocked: false,
     condition: () => props.upgrades?.reduce((total, u) => total + u.owned, 0) >= 10
+  },
+  {
+    id: 5,
+    name: "Millionnaire",
+    description: "Avoir 1,000,000 cookies",
+    icon: "💰",
+    unlocked: false,
+    condition: () => props.cookies >= 1000000
   }
 ])
 
-const unlockedCount = computed(() => {
-  // Vérifier les conditions et débloquer les succès
+// Fonction pour afficher une notification
+const showNotification = (message, icon = '🎉') => {
+  const id = Date.now()
+  const notification = {
+    id,
+    message,
+    icon,
+    show: false
+  }
+  
+  notifications.value.push(notification)
+  
+  // Animation d'entrée
+  nextTick(() => {
+    notification.show = true
+  })
+  
+  // Supprimer après 3 secondes
+  setTimeout(() => {
+    notification.show = false
+    setTimeout(() => {
+      const index = notifications.value.findIndex(n => n.id === id)
+      if (index > -1) {
+        notifications.value.splice(index, 1)
+      }
+    }, 500) // Délai pour l'animation de sortie
+  }, 3000)
+}
+
+// Fonction pour vérifier les succès
+const checkAchievements = () => {
   achievements.value.forEach(achievement => {
     if (!achievement.unlocked && achievement.condition()) {
       achievement.unlocked = true
+      showNotification(`Succès débloqué: ${achievement.name}!`, achievement.icon)
     }
   })
-  
+}
+
+// Surveiller les changements des props
+watch(() => props.upgrades, checkAchievements, { deep: true })
+watch(() => props.cookies, checkAchievements)
+watch(() => props.totalClicks, checkAchievements)
+
+const unlockedCount = computed(() => {
+  checkAchievements()
   return achievements.value.filter(a => a.unlocked).length
 })
 
@@ -97,14 +148,43 @@ const toggleDropdown = () => {
 </script>
 
 <style scoped>
+.notifications-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.notification {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  padding: 12px 20px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  font-weight: bold;
+  transform: translateX(100%);
+  opacity: 0;
+  transition: all 0.5s ease;
+  max-width: 300px;
+  word-wrap: break-word;
+}
+
+.notification.fade-in {
+  transform: translateX(0);
+  opacity: 1;
+}
+
 .achievements-container {
   position: relative;
   margin-bottom: 20px;
+  width: 80%;
 }
 
 .achievements-btn {
   width: 100%;
-  padding: 12px 16px;
+  padding: 16px 20px;
   background: linear-gradient(135deg, #ffd700, #ffb347);
   border: 2px solid #daa520;
   border-radius: 8px;
@@ -115,6 +195,8 @@ const toggleDropdown = () => {
   justify-content: space-between;
   align-items: center;
   transition: all 0.3s ease;
+  font-size: 16px;
+  min-height: 60px;
 }
 
 .achievements-btn:hover {
@@ -129,6 +211,7 @@ const toggleDropdown = () => {
 
 .arrow {
   transition: transform 0.3s ease;
+  font-size: 18px;
 }
 
 .arrow.rotated {
