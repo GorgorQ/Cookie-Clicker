@@ -1,7 +1,8 @@
 <template>
   <div class="container">
     <section class="left">
-      <!-- Contenu à définir -->
+      <Options />
+      <Achievements :cookies="count" :total-clicks="count" :upgrades="[]" />
     </section>
     <section class="center">
       <div class="cookies-stats">
@@ -11,60 +12,26 @@
       <img class="cookie-btn" src="./assets/image.png" @click="count++" alt="Cookie">
     </section>
     <section class="right">
-      <Upgrades :cookies="count" :upgrades="upgrades" @buy-upgrade="buyUpgrade" />
+      <Upgrades :cookies="count" @buy-upgrade="buyUpgrade" @cps-update="updateCps" />
     </section>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from "vue"
+import { ref, onMounted, onUnmounted } from "vue"
 import Upgrades from "./components/Upgrades.vue"
+import Achievements from "./components/Achievements.vue"
+import Options from "./components/Options.vue"
 
 const count = ref(0)
+const cookiesPerSecond = ref(0)
 
-const upgrades = ref([
-  {
-    id: 1,
-    name: "Cursor",
-    description: "Ajoute 1 clic par seconde",
-    basePrice: 15,
-    price: 15,
-    owned: 0,
-    cps: 1
-  },
-  {
-    id: 2,
-    name: "Grandma",
-    description: "Une grand-mère gentille pour faire des cookies",
-    basePrice: 100,
-    price: 100,
-    owned: 0,
-    cps: 10
-  },
-  {
-    id: 3,
-    name: "Farm",
-    description: "Cultive des cookies",
-    basePrice: 1100,
-    price: 1100,
-    owned: 0,
-    cps: 15
-  }
-])
+const buyUpgrade = (cost) => {
+  count.value -= cost
+}
 
-const cookiesPerSecond = computed(() => {
-  return upgrades.value.reduce((total, upgrade) => {
-    return total + (upgrade.owned * upgrade.cps)
-  }, 0)
-})
-
-const buyUpgrade = (upgradeId) => {
-  const upgrade = upgrades.value.find(u => u.id === upgradeId)
-  if (upgrade && count.value >= upgrade.price) {
-    count.value -= upgrade.price
-    upgrade.owned++
-    upgrade.price = Math.floor(upgrade.basePrice * Math.pow(1.15, upgrade.owned))
-  }
+const updateCps = (newCps) => {
+  cookiesPerSecond.value = newCps
 }
 
 let interval = null
@@ -136,5 +103,13 @@ html, body, #app {
   filter: brightness(0.95);
 }
 
+.right {
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 100vh;
+}
+.right::-webkit-scrollbar {
+  display: none; 
+}
 
 </style>
