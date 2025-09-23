@@ -43,9 +43,11 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onMounted } from 'vue'
 
 const props = defineProps(['cookies', 'totalClicks', 'upgrades'])
+
+const emit = defineEmits(['achievements-update'])
 
 const isOpen = ref(false)
 const notifications = ref([])
@@ -124,13 +126,26 @@ const showNotification = (message, icon = '🎉') => {
 
 // Fonction pour vérifier les succès
 const checkAchievements = () => {
+  let hasNewAchievement = false
+  
   achievements.value.forEach(achievement => {
     if (!achievement.unlocked && achievement.condition()) {
       achievement.unlocked = true
+      hasNewAchievement = true
       showNotification(`Succès débloqué: ${achievement.name}!`, achievement.icon)
     }
   })
+  
+  // Émettre les achievements mis à jour
+  if (hasNewAchievement) {
+    emit('achievements-update', achievements.value)
+  }
 }
+
+// Émettre les achievements au montage du composant
+onMounted(() => {
+  emit('achievements-update', achievements.value)
+})
 
 // Surveiller les changements des props
 watch(() => props.upgrades, checkAchievements, { deep: true })

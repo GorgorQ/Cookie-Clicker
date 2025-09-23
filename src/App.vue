@@ -1,10 +1,29 @@
 <template>
   <div class="container">
     <section class="left">
-      <Connection />
-      <Options />
+      <Connection 
+        ref="connectionRef"
+        :cookies="count" 
+        :upgrades="currentUpgrades" 
+        :achievements="currentAchievements"
+        :totalClicks="totalClicks" 
+        :cps="cookiesPerSecond"
+        @load-user-data="loadUserData"
+      />
+      <Options 
+        :isConnected="connectionRef?.isConnected || false"
+        :username="connectionRef?.username || ''"
+        :gameData="currentGameData"
+        @load-save-data="handleLoadSaveData"
+        @clear-save-data="handleClearSaveData"
+      />
+      <Achievements 
+        :cookies="count" 
+        :totalClicks="totalClicks" 
+        :upgrades="currentUpgrades"
+        @achievements-update="currentAchievements = $event"
+      />
       <Ranking :cookies="count" :cps="cookiesPerSecond" :playerName="'You'" />
-      <Achievements :cookies="count" :totalClicks="totalClicks" :upgrades="currentUpgrades" />
     </section>
     <section class="center">
       <div class="cookies-stats">
@@ -20,7 +39,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue"
+import { ref, onMounted, onUnmounted, computed } from "vue"
 import Upgrades from "./components/Upgrades.vue"
 import Achievements from "./components/Achievements.vue"
 import Options from "./components/Options.vue"
@@ -31,6 +50,10 @@ const count = ref(0)
 const cookiesPerSecond = ref(0)
 const totalClicks = ref(0)
 const currentUpgrades = ref([])
+const connectionRef = ref(null)
+
+// Ajouter une ref pour les achievements
+const currentAchievements = ref([])
 
 const handleCookieClick = () => {
   count.value++
@@ -48,6 +71,58 @@ const updateCps = (newCps) => {
 const updateUpgrades = (upgrades) => {
   currentUpgrades.value = upgrades
 }
+
+const loadUserData = (gameData) => {
+  count.value = gameData.cookies || 0
+  totalClicks.value = gameData.totalClicks || 0
+  cookiesPerSecond.value = gameData.cps || 0
+  currentUpgrades.value = gameData.upgrades || []
+  currentAchievements.value = gameData.achievements || []
+  
+  console.log('User data loaded:', gameData)
+}
+
+// Nouvelle fonction pour gérer l'import de sauvegarde
+const handleLoadSaveData = (saveData) => {
+  count.value = saveData.cookies || 0
+  totalClicks.value = saveData.totalClicks || 0
+  cookiesPerSecond.value = saveData.cps || 0
+  currentUpgrades.value = saveData.upgrades || []
+  currentAchievements.value = saveData.achievements || []
+  
+  // Sauvegarder les nouvelles données pour l'utilisateur connecté
+  if (connectionRef.value?.isConnected) {
+    connectionRef.value.saveUserGameData()
+  }
+  
+  console.log('Save data loaded from Options:', saveData)
+}
+
+// Fonction pour effacer la sauvegarde
+const handleClearSaveData = (emptyData) => {
+  count.value = emptyData.cookies
+  totalClicks.value = emptyData.totalClicks
+  cookiesPerSecond.value = emptyData.cps
+  currentUpgrades.value = emptyData.upgrades
+  currentAchievements.value = emptyData.achievements
+  
+  // Sauvegarder les données vides
+  if (connectionRef.value?.isConnected) {
+    connectionRef.value.saveUserGameData()
+  }
+  
+  console.log('Save data cleared')
+}
+
+// Computed pour les données de jeu actuelles
+const currentGameData = computed(() => ({
+  cookies: count.value,
+  totalClicks: totalClicks.value,
+  cps: cookiesPerSecond.value,
+  upgrades: currentUpgrades.value,
+  achievements: currentAchievements.value,
+  lastSaved: new Date().toISOString()
+}))
 
 let interval = null
 

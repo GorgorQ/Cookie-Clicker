@@ -1,107 +1,58 @@
 <template>
-  <div class="options-container">
+  <div class="save-manager-container">
     <button 
       @click="toggleDropdown" 
-      class="options-btn"
+      class="save-manager-btn"
       :class="{ active: isOpen }"
     >
-      ⚙️ Options
+      💾 Save Manager
       <span class="arrow" :class="{ rotated: isOpen }">▼</span>
     </button>
     
-    <div v-if="isOpen" class="options-dropdown">
-      <div class="options-header">
-        <h3>Game Options</h3>
+    <div v-if="isOpen" class="save-manager-dropdown">
+      <div class="save-manager-header">
+        <h3>Save Manager</h3>
       </div>
       
-      <div class="options-content">
-        <!-- Save Management Section -->
-        <div class="options-section">
-          <h4>Save Management</h4>
-          <div class="save-controls">
-            <button @click="exportSave" class="option-btn export-btn" :disabled="!isConnected">
-              📤 Export Save
-            </button>
-            
-            <button @click="triggerImport" class="option-btn import-btn" :disabled="!isConnected">
-              📥 Import Save
-            </button>
-            
-            <button @click="clearSave" class="option-btn clear-btn" :disabled="!isConnected">
-              🗑️ Clear Save
-            </button>
-            
-            <input 
-              ref="fileInput"
-              type="file" 
-              accept=".txt,.json"
-              @change="importSave"
-              style="display: none"
-            />
-          </div>
-          
-          <!-- Save Information -->
-          <div v-if="isConnected && gameData" class="save-info">
-            <h5>Current Save Info:</h5>
-            <div class="save-stats">
-              <div class="stat-item">
-                <span class="stat-label">Cookies:</span>
-                <span class="stat-value">{{ formatNumber(gameData.cookies || 0) }}</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">Total Clicks:</span>
-                <span class="stat-value">{{ formatNumber(gameData.totalClicks || 0) }}</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">CPS:</span>
-                <span class="stat-value">{{ formatNumber(gameData.cps || 0) }}</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">Upgrades:</span>
-                <span class="stat-value">{{ (gameData.upgrades || []).reduce((total, u) => total + u.owned, 0) }}</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">Achievements:</span>
-                <span class="stat-value">{{ (gameData.achievements || []).filter(a => a.unlocked).length }}</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">Last Saved:</span>
-                <span class="stat-value">{{ formatDate(gameData.lastSaved) }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Game Settings Section -->
-        <div class="options-section">
-          <h4>Game Settings</h4>
-          <div class="setting-item">
-            <label>
-              <input type="checkbox" disabled> Auto-save (Coming soon)
-            </label>
-          </div>
-          <div class="setting-item">
-            <label>
-              <input type="checkbox" disabled> Sound effects (Coming soon)
-            </label>
-          </div>
-          <div class="setting-item">
-            <label>
-              <input type="checkbox" disabled> Notifications (Coming soon)
-            </label>
-          </div>
-        </div>
-
-        <div v-if="!isConnected" class="not-connected">
-          <p>⚠️ You must be connected to manage saves</p>
-        </div>
+      <div class="save-controls">
+        <button @click="exportSave" class="control-btn export-btn" :disabled="!isConnected">
+          📤 Export Save
+        </button>
+        
+        <button @click="triggerImport" class="control-btn import-btn" :disabled="!isConnected">
+          📥 Import Save
+        </button>
+        
+        <button @click="clearSave" class="control-btn clear-btn" :disabled="!isConnected">
+          🗑️ Clear Save
+        </button>
+        
+        <input 
+          ref="fileInput"
+          type="file" 
+          accept=".txt,.json"
+          @change="importSave"
+          style="display: none"
+        />
+      </div>
+      
+      <div v-if="saveInfo" class="save-info">
+        <p><strong>Current Save:</strong></p>
+        <p>Cookies: {{ formatNumber(saveInfo.cookies) }}</p>
+        <p>Total Clicks: {{ formatNumber(saveInfo.totalClicks) }}</p>
+        <p>CPS: {{ formatNumber(saveInfo.cps) }}</p>
+        <p>Last Saved: {{ formatDate(saveInfo.lastSaved) }}</p>
+      </div>
+      
+      <div v-if="!isConnected" class="not-connected">
+        <p>⚠️ You must be connected to manage saves</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const props = defineProps(['isConnected', 'username', 'gameData'])
 const emit = defineEmits(['load-save-data', 'clear-save-data'])
@@ -109,9 +60,20 @@ const emit = defineEmits(['load-save-data', 'clear-save-data'])
 const isOpen = ref(false)
 const fileInput = ref(null)
 
+const saveInfo = computed(() => {
+  return props.gameData || null
+})
+
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value
 }
+
+// Fermer le dropdown si l'utilisateur se déconnecte
+watch(() => props.isConnected, (connected) => {
+  if (!connected) {
+    isOpen.value = false
+  }
+})
 
 // Exporter la sauvegarde
 const exportSave = () => {
@@ -120,6 +82,7 @@ const exportSave = () => {
     return
   }
   
+  // Créer un objet de sauvegarde
   const saveData = {
     version: "1.0",
     player: props.username,
@@ -131,8 +94,10 @@ const exportSave = () => {
     exportDate: new Date().toISOString()
   }
   
+  // Encoder en base64
   const saveString = btoa(JSON.stringify(saveData))
   
+  // Créer et télécharger le fichier
   const blob = new Blob([saveString], { type: 'text/plain' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -147,6 +112,7 @@ const exportSave = () => {
   alert('Save exported successfully!')
 }
 
+// Déclencher l'import
 const triggerImport = () => {
   if (!props.isConnected) {
     alert('You must be connected to import a save!')
@@ -155,6 +121,7 @@ const triggerImport = () => {
   fileInput.value?.click()
 }
 
+// Importer la sauvegarde
 const importSave = (event) => {
   const file = event.target.files[0]
   if (!file || !props.isConnected) return
@@ -163,18 +130,22 @@ const importSave = (event) => {
   reader.onload = (e) => {
     try {
       let saveString = e.target.result
-      let saveData
       
+      // Décoder depuis base64
+      let saveData
       try {
         saveData = JSON.parse(atob(saveString))
       } catch {
+        // Si ce n'est pas en base64, essayer directement
         saveData = JSON.parse(saveString)
       }
       
+      // Valider les données
       if (typeof saveData.cookies !== 'number' || saveData.cookies < 0) {
-        throw new Error('Invalid save format')
+        throw new Error('Invalid save format: cookies')
       }
       
+      // Confirmer l'import
       const confirmImport = confirm(
         `Import save from ${saveData.player || 'Unknown'}?\n` +
         `Cookies: ${formatNumber(saveData.cookies)}\n` +
@@ -185,6 +156,7 @@ const importSave = (event) => {
       
       if (!confirmImport) return
       
+      // Émettre les nouvelles données vers le parent
       const importedData = {
         cookies: saveData.cookies || 0,
         totalClicks: saveData.totalClicks || 0,
@@ -195,6 +167,8 @@ const importSave = (event) => {
       }
       
       emit('load-save-data', importedData)
+      
+      console.log('Save imported for', props.username)
       alert('Save imported successfully!')
     } catch (error) {
       console.error('Error importing save:', error)
@@ -203,9 +177,10 @@ const importSave = (event) => {
   }
   
   reader.readAsText(file)
-  event.target.value = ''
+  event.target.value = '' // Reset input
 }
 
+// Effacer la sauvegarde
 const clearSave = () => {
   if (!props.isConnected) {
     alert('You must be connected to clear your save!')
@@ -215,12 +190,14 @@ const clearSave = () => {
   const confirmClear = confirm(
     'Are you sure you want to clear your save?\n' +
     'This action cannot be undone!\n\n' +
-    `Current Cookies: ${formatNumber(props.gameData?.cookies || 0)}\n` +
-    `Current CPS: ${formatNumber(props.gameData?.cps || 0)}`
+    'Current progress:\n' +
+    `Cookies: ${formatNumber(props.gameData?.cookies || 0)}\n` +
+    `CPS: ${formatNumber(props.gameData?.cps || 0)}`
   )
   
   if (!confirmClear) return
   
+  // Émettre les données vides
   const emptyData = {
     cookies: 0,
     totalClicks: 0,
@@ -231,9 +208,12 @@ const clearSave = () => {
   }
   
   emit('clear-save-data', emptyData)
+  
+  console.log('Save cleared for', props.username)
   alert('Save cleared successfully!')
 }
 
+// Utilitaires
 const formatNumber = (num) => {
   if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B'
   if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M'
@@ -248,20 +228,17 @@ const formatDate = (dateString) => {
 </script>
 
 <style scoped>
-.options-container {
-  width: 100%;
-  margin-bottom: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.save-manager-container {
   position: relative;
+  margin-bottom: 20px;
+  width: 100%;
 }
 
-.options-btn {
+.save-manager-btn {
   width: 100%;
   padding: 16px 20px;
-  background: linear-gradient(135deg, #6c757d, #495057);
-  border: 2px solid #495057;
+  background: linear-gradient(135deg, #17a2b8, #138496);
+  border: 2px solid #138496;
   border-radius: 8px;
   color: white;
   font-weight: bold;
@@ -274,14 +251,14 @@ const formatDate = (dateString) => {
   min-height: 60px;
 }
 
-.options-btn:hover {
-  background: linear-gradient(135deg, #5a6268, #343a40);
+.save-manager-btn:hover {
+  background: linear-gradient(135deg, #138496, #117a8b);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+  box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
 }
 
-.options-btn.active {
-  background: linear-gradient(135deg, #495057, #6c757d);
+.save-manager-btn.active {
+  background: linear-gradient(135deg, #138496, #17a2b8);
 }
 
 .arrow {
@@ -293,13 +270,13 @@ const formatDate = (dateString) => {
   transform: rotate(180deg);
 }
 
-.options-dropdown {
+.save-manager-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
   right: 0;
   background: white;
-  border: 2px solid #495057;
+  border: 2px solid #138496;
   border-top: none;
   border-radius: 0 0 8px 8px;
   max-height: 400px;
@@ -308,52 +285,31 @@ const formatDate = (dateString) => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.options-dropdown::-webkit-scrollbar {
+.save-manager-dropdown::-webkit-scrollbar {
   display: none;
 }
 
-.options-header {
+.save-manager-header {
   padding: 15px;
   background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   border-bottom: 1px solid #dee2e6;
 }
 
-.options-header h3 {
+.save-manager-header h3 {
   margin: 0;
   color: #333;
   font-size: 18px;
   text-align: center;
 }
 
-.options-content {
-  padding: 15px;
-}
-
-.options-section {
-  margin-bottom: 20px;
-}
-
-.options-section:last-child {
-  margin-bottom: 0;
-}
-
-.options-section h4 {
-  margin: 0 0 10px 0;
-  color: #495057;
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
 .save-controls {
+  padding: 15px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 15px;
+  gap: 10px;
 }
 
-.option-btn {
+.control-btn {
   width: 100%;
   padding: 10px 15px;
   border-radius: 6px;
@@ -394,70 +350,31 @@ const formatDate = (dateString) => {
   transform: translateY(-1px);
 }
 
-.option-btn:disabled {
+.control-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 .save-info {
+  padding: 15px;
   background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-  padding: 12px;
-}
-
-.save-info h5 {
-  margin: 0 0 8px 0;
-  color: #495057;
+  border-top: 1px solid #dee2e6;
   font-size: 13px;
-  font-weight: 600;
 }
 
-.save-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.stat-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-}
-
-.stat-label {
-  color: #6c757d;
-  font-weight: 500;
-}
-
-.stat-value {
+.save-info p {
+  margin: 4px 0;
   color: #495057;
-  font-weight: 600;
 }
 
-.setting-item {
-  margin-bottom: 8px;
-}
-
-.setting-item label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #495057;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.setting-item input[type="checkbox"] {
-  margin: 0;
+.save-info strong {
+  color: #212529;
 }
 
 .not-connected {
+  padding: 15px;
   text-align: center;
   color: #6c757d;
   font-style: italic;
-  font-size: 13px;
-  margin-top: 10px;
 }
 </style>

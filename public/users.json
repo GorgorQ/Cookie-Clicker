@@ -1,0 +1,48 @@
+{
+  "users": [
+    {
+      "username": "admin",
+      "password": "admin123",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "gameData": {
+        "cookies": 1000000,
+        "totalClicks": 5000,
+        "cps": 500,
+        "upgrades": [
+          { "id": 1, "name": "Cursor", "owned": 10, "price": 27 },
+          { "id": 2, "name": "Grandma", "owned": 5, "price": 163 }
+        ],
+        "achievements": [],
+        "lastSaved": "2024-01-01T00:00:00.000Z"
+      }
+    },
+    {
+      "username": "player1",
+      "password": "password",
+      "createdAt": "2024-01-02T00:00:00.000Z",
+      "gameData": {
+        "cookies": 50000,
+        "totalClicks": 1000,
+        "cps": 50,
+        "upgrades": [
+          { "id": 1, "name": "Cursor", "owned": 3, "price": 18 }
+        ],
+        "achievements": [],
+        "lastSaved": "2024-01-02T00:00:00.000Z"
+      }
+    },
+    {
+      "username": "testuser",
+      "password": "test123",
+      "createdAt": "2024-01-03T00:00:00.000Z",
+      "gameData": {
+        "cookies": 0,
+        "totalClicks": 0,
+        "cps": 0,
+        "upgrades": [],
+        "achievements": [],
+        "lastSaved": "2024-01-03T00:00:00.000Z"
+      }
+    }
+  ]
+}
