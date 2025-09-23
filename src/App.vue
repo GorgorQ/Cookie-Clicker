@@ -46,6 +46,7 @@ import Options from "./components/Options.vue"
 import Connection from "./components/Connection.vue"
 import Ranking from "./components/Ranking.vue"
 
+
 const count = ref(0)
 const cookiesPerSecond = ref(0)
 const totalClicks = ref(0)
