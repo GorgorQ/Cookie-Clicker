@@ -20,7 +20,7 @@
 import { ref, computed, watch } from "vue"
 import UpgradeItem from './UpgradeItem.vue'
 
-const props = defineProps(['cookies'])
+const props = defineProps(['cookies', 'savedUpgrades'])
 const emit = defineEmits(['buy-upgrade', 'cps-update', 'upgrades-update'])
 
 const upgrades = ref([
@@ -125,6 +125,20 @@ const cookiesPerSecond = computed(() => {
 // Émet le CPS chaque fois qu'il change
 watch(cookiesPerSecond, (newCps) => {
   emit('cps-update', newCps)
+}, { immediate: true })
+
+// Restaurer les upgrades sauvegardés
+watch(() => props.savedUpgrades, (savedUpgrades) => {
+  if (savedUpgrades && savedUpgrades.length > 0) {
+    // Fusionner les upgrades sauvegardés avec les upgrades par défaut
+    upgrades.value.forEach(upgrade => {
+      const savedUpgrade = savedUpgrades.find(s => s.id === upgrade.id)
+      if (savedUpgrade) {
+        upgrade.owned = savedUpgrade.owned || 0
+        upgrade.price = savedUpgrade.price || upgrade.basePrice
+      }
+    })
+  }
 }, { immediate: true })
 
 // Émet les upgrades à chaque changement

@@ -5,9 +5,9 @@
       "password": "admin123",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "gameData": {
-        "cookies": 1000000,
+        "cookies": 1000000000000,
         "totalClicks": 5000,
-        "cps": 500,
+        "cps": 50000,
         "upgrades": [
           { "id": 1, "name": "Cursor", "owned": 10, "price": 27 },
           { "id": 2, "name": "Grandma", "owned": 5, "price": 163 }

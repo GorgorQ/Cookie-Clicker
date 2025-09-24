@@ -185,11 +185,12 @@ const clearSave = () => {
   
   if (!confirmClear) return
   
+  // Les données vides - les upgrades seront gérés par App.vue
   const emptyData = {
     cookies: 0,
     totalClicks: 0,
     cps: 0,
-    upgrades: [],
+    upgrades: [], // App.vue gérera la réinitialisation complète
     achievements: [],
     lastSaved: new Date().toISOString()
   }

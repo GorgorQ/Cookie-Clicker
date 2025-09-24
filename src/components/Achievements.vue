@@ -45,7 +45,7 @@
 <script setup>
 import { ref, computed, watch, nextTick, onMounted } from 'vue'
 
-const props = defineProps(['cookies', 'totalClicks', 'upgrades'])
+const props = defineProps(['cookies', 'totalClicks', 'upgrades', 'resetTrigger'])
 
 const emit = defineEmits(['achievements-update'])
 
@@ -141,6 +141,22 @@ const checkAchievements = () => {
     emit('achievements-update', achievements.value)
   }
 }
+
+// Fonction pour réinitialiser tous les achievements
+const resetAchievements = () => {
+  achievements.value.forEach(achievement => {
+    achievement.unlocked = false
+  })
+  emit('achievements-update', achievements.value)
+  console.log('Achievements reset to default state')
+}
+
+// Écouter le trigger de reset
+watch(() => props.resetTrigger, (newValue) => {
+  if (newValue > 0) {
+    resetAchievements()
+  }
+})
 
 // Émettre les achievements au montage du composant
 onMounted(() => {

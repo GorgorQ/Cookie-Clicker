@@ -81,9 +81,8 @@
       </div>
     </div>
 
-    <!-- Bouton de connexion/déconnexion -->
+    <!-- Bouton de connexion/déconnexion (toujours visible) -->
     <button 
-      v-if="!showForm"
       class="connection-btn" 
       :class="{ connected: isConnected }"
       @click="toggleConnection"
@@ -116,12 +115,28 @@ const signupData = ref({
 
 // Props pour recevoir les données du jeu depuis App.vue
 const props = defineProps(['cookies', 'upgrades', 'achievements', 'totalClicks', 'cps'])
-const emit = defineEmits(['load-user-data'])
+const emit = defineEmits(['load-user-data', 'user-disconnected'])
 
 // Charger les données au démarrage
 onMounted(async () => {
   await loadUsersFromJSON()
   loadCurrentUser()
+  
+  // Charger les données invité si pas connecté
+  const guestData = localStorage.getItem('cookieClicker_guestData')
+  if (guestData && !connectionRef.value?.isConnected) {
+    try {
+      const data = JSON.parse(guestData)
+      count.value = data.cookies || 0
+      totalClicks.value = data.totalClicks || 0
+      cookiesPerSecond.value = data.cps || 0
+      currentUpgrades.value = data.upgrades || []
+      currentAchievements.value = data.achievements || []
+      console.log('Guest data loaded from localStorage')
+    } catch (error) {
+      console.error('Error loading guest data:', error)
+    }
+  }
 })
 
 const canSignin = computed(() => {
@@ -249,7 +264,7 @@ const signin = () => {
   resetForms()
   
   setTimeout(() => {
-    loadUserGameData()
+    loadUserGameData(true) // true = première connexion
   }, 100)
   
   console.log('Signed in as', username.value)
@@ -292,12 +307,20 @@ const resetForms = () => {
 
 const toggleConnection = () => {
   if (isConnected.value) {
+    // Sauvegarder avant déconnexion
     saveUserGameData()
     
-    isConnected.value = false
-    username.value = ''
-    removeCurrentUser()
-    console.log('Disconnected')
+    // Attendre un peu pour que la sauvegarde se fasse
+    setTimeout(() => {
+      isConnected.value = false
+      username.value = ''
+      removeCurrentUser()
+      
+      // Émettre l'événement de déconnexion pour remettre le jeu à zéro
+      emit('user-disconnected')
+      
+      console.log('Disconnected and data saved')
+    }, 100)
   } else {
     showForm.value = true
     activeTab.value = 'signin'
@@ -324,21 +347,49 @@ const saveUserGameData = () => {
   }
 }
 
-const loadUserGameData = () => {
+const loadUserGameData = (isFirstConnection = false) => {
   if (!isConnected.value) return
   
+  // Si c'est une première connexion, charger depuis le JSON
+  if (isFirstConnection) {
+    const user = users.value.find(user => user.username === username.value)
+    
+    if (user && user.gameData) {
+      emit('load-user-data', user.gameData)
+      console.log('Game data loaded from JSON for first connection:', username.value, user.gameData)
+      return
+    }
+  }
+  
+  // Sinon (refresh/rechargement), vérifier d'abord le localStorage
+  const localStorageData = localStorage.getItem('cookieClickerSave')
+  
+  if (localStorageData) {
+    try {
+      const gameData = JSON.parse(localStorageData)
+      // Prioriser les données du localStorage qui sont plus récentes
+      emit('load-user-data', gameData)
+      console.log('Game data loaded from localStorage for connected user:', username.value, gameData)
+      return
+    } catch (error) {
+      console.error('Error loading from localStorage for connected user:', error)
+    }
+  }
+  
+  // Si pas de localStorage ou erreur, charger depuis le JSON
   const user = users.value.find(user => user.username === username.value)
   
   if (user && user.gameData) {
     emit('load-user-data', user.gameData)
-    console.log('Game data loaded for', username.value, user.gameData)
+    console.log('Game data loaded from JSON for', username.value, user.gameData)
   }
 }
 
 defineExpose({
   saveUserGameData,
   isConnected,
-  downloadUpdatedJSON  // Optionnel: exposer la fonction pour usage manuel
+  username, 
+  downloadUpdatedJSON  
 })
 </script>
 
