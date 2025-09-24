@@ -29,8 +29,8 @@
     </section>
     <section class="center">
       <div class="cookies-stats">
-        <p>Number of cookies {{ count }}</p>
-        <p>Cookies per second: {{ cookiesPerSecond }}</p>
+        <p>Number of cookies {{ formatNumber(count) }}</p>
+        <p>Cookies per second: {{ formatNumber(cookiesPerSecond) }}</p>
       </div>
       <img class="cookie-btn" src="./assets/image.png" @click="handleCookieClick" alt="Cookie">
     </section>
@@ -60,6 +60,22 @@ const currentAchievements = ref([])
 
 // Variable pour déclencher le reset des achievements
 const resetTrigger = ref(0)
+
+// Fonction pour formater les grands nombres
+const formatNumber = (num) => {
+  if (num >= 1000000000000) return (num / 1000000000000).toFixed(1) + 'T'
+  if (num >= 1000000000) return (num / 1000000000).toFixed(1) + 'B'
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M'
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'K'
+  return Math.floor(num).toString()
+}
+
+// Fonction pour mettre à jour le titre de l'onglet
+const updatePageTitle = () => {
+  const cookieCount = formatNumber(count.value)
+  const cps = cookiesPerSecond.value > 0 ? ` | ${formatNumber(cookiesPerSecond.value)}/s` : ''
+  document.title = `${cookieCount}${cps}`
+}
 
 // Fonction pour sauvegarder dans le localStorage
 const saveToLocalStorage = () => {
@@ -117,6 +133,9 @@ const loadUserData = (gameData) => {
   cookiesPerSecond.value = gameData.cps || 0
   currentUpgrades.value = gameData.upgrades || []
   currentAchievements.value = gameData.achievements || []
+  
+  // Mettre à jour le titre après le chargement
+  setTimeout(() => updatePageTitle(), 100)
   
   console.log('User data loaded successfully')
 }
@@ -226,6 +245,9 @@ const resetGameToDefault = () => {
   // Déclencher le reset des achievements
   resetTrigger.value++
   
+  // Mettre à jour le titre de l'onglet
+  updatePageTitle()
+  
   // Effacer aussi le localStorage pour éviter les conflits
   localStorage.removeItem('cookieClickerSave')
   
@@ -263,6 +285,9 @@ const handleClearSaveData = (emptyData) => {
   // Déclencher le reset des achievements
   resetTrigger.value++
   
+  // Mettre à jour le titre de l'onglet
+  updatePageTitle()
+  
   // Effacer aussi le localStorage
   localStorage.removeItem('cookieClickerSave')
   
@@ -289,6 +314,13 @@ const saveTimeout = ref(null)
 const dbSaveTimeout = ref(null)
 const isMounted = ref(false)
 
+// Mettre à jour le titre de l'onglet quand les cookies changent
+watch([count, cookiesPerSecond], () => {
+  if (isMounted.value) {
+    updatePageTitle()
+  }
+})
+
 // Sauvegarder automatiquement quand les cookies changent
 watch([count, totalClicks, cookiesPerSecond, currentUpgrades, currentAchievements], () => {
   // Ne sauvegarder que si le composant est monté
@@ -313,6 +345,9 @@ onMounted(() => {
   // Marquer le composant comme monté
   isMounted.value = true
   
+  // Mettre à jour le titre initial
+  updatePageTitle()
+  
   // Charger les données depuis le localStorage seulement si pas d'utilisateur connecté
   setTimeout(() => {
     // Si aucun utilisateur n'est connecté, charger le localStorage
@@ -320,6 +355,9 @@ onMounted(() => {
       loadFromLocalStorage()
     }
     // Sinon, les données seront chargées par Connection.vue via loadUserGameData
+    
+    // Mettre à jour le titre après le chargement des données
+    updatePageTitle()
   }, 300) // Délai suffisant pour laisser Connection.vue gérer la connexion
   
   window.addEventListener('beforeunload', () => {
