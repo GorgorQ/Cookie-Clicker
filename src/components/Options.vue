@@ -39,7 +39,7 @@
       <!-- Toujours afficher les infos de sauvegarde si on a des données -->
       <div v-if="saveInfo" class="save-info">
         <p><strong>Current Save:</strong></p>
-        <p>Player: {{ isConnected ? username : 'Guest' }}</p>
+        <p>Player: {{ displayName || (isConnected ? username : 'Guest') }}</p>
         <p>Cookies: {{ formatNumber(saveInfo.cookies) }}</p>
         <p>Total Clicks: {{ formatNumber(saveInfo.totalClicks) }}</p>
         <p>CPS: {{ formatNumber(saveInfo.cps) }}</p>
@@ -59,7 +59,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 
-const props = defineProps(['isConnected', 'username', 'gameData'])
+const props = defineProps(['isConnected', 'username', 'displayName', 'gameData'])
 const emit = defineEmits(['load-save-data', 'clear-save-data'])
 
 const isOpen = ref(false)
@@ -105,7 +105,7 @@ const exportSave = () => {
     // Créer l'objet d'export
     const exportData = {
       version: "1.0",
-      player: props.isConnected ? props.username : 'Guest',
+      player: props.displayName || (props.isConnected ? props.username : 'Guest'),
       cookies: saveData.cookies || 0,
       totalClicks: saveData.totalClicks || 0,
       cps: saveData.cps || 0,
@@ -121,7 +121,8 @@ const exportSave = () => {
     const exportString = btoa(unescape(encodeURIComponent(jsonString)))
     
     // Créer et télécharger le fichier
-    const filename = `${props.isConnected ? props.username : 'guest'}_save.txt`
+    const displayNameForFile = props.displayName || (props.isConnected ? props.username : 'guest')
+    const filename = `${displayNameForFile.toLowerCase().replace(/\s+/g, '_')}_save.txt`
     
     // Méthode simple de téléchargement
     const element = document.createElement('a')

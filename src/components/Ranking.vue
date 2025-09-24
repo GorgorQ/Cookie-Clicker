@@ -100,13 +100,8 @@ const toggleDropdown = async () => {
 
 
 const updateCurrentPlayer = () => {
-  // Déterminer le nom du joueur actuel
-  let currentPlayerName
-  if (props.isConnected && props.username) {
-    currentPlayerName = props.username
-  } else {
-    currentPlayerName = "Guest"
-  }
+  // Déterminer le nom du joueur actuel - utiliser toujours props.username (qui contient le display name)
+  let currentPlayerName = props.username || "Guest"
   
   // Retirer l'ancien joueur actuel et le joueur connecté s'il existe déjà dans la liste
   players.value = players.value.filter(p => !p.isCurrentPlayer && p.name !== currentPlayerName)
@@ -180,6 +175,13 @@ watch(() => props.cookies, () => {
 
 // Watcher pour mettre à jour quand le statut de connexion change
 watch(() => props.isConnected, () => {
+  if (isOpen.value) {
+    updateCurrentPlayer()
+  }
+})
+
+// Watcher pour mettre à jour quand le username/display name change
+watch(() => props.username, () => {
   if (isOpen.value) {
     updateCurrentPlayer()
   }

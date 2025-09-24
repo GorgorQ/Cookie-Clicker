@@ -1,6 +1,12 @@
 <template>
   <div class="container">
     <section class="left">
+      <DisplayName
+        ref="displayNameRef"
+        :isConnected="connectionRef?.isConnected || false"
+        :username="connectionRef?.username || ''"
+        @display-name-changed="refreshDisplayName"
+      />
       <Connection 
         ref="connectionRef"
         :cookies="count" 
@@ -14,6 +20,7 @@
       <Options 
         :isConnected="connectionRef?.isConnected || false"
         :username="connectionRef?.username || ''"
+        :displayName="currentDisplayName"
         :gameData="currentGameData"
         @load-save-data="handleLoadSaveData"
         @clear-save-data="handleClearSaveData"
@@ -30,7 +37,7 @@
         :cps="cookiesPerSecond" 
         :playerName="'You'" 
         :isConnected="connectionRef?.isConnected || false"
-        :username="connectionRef?.username || ''"
+        :username="currentDisplayName"
       />
     </section>
     <section class="center">
@@ -53,6 +60,7 @@ import Achievements from "./components/Achievements.vue"
 import Options from "./components/Options.vue"
 import Connection from "./components/Connection.vue"
 import Ranking from "./components/Ranking.vue"
+import DisplayName from "./components/DisplayName.vue"
 
 
 const count = ref(0)
@@ -60,12 +68,16 @@ const cookiesPerSecond = ref(0)
 const totalClicks = ref(0)
 const currentUpgrades = ref([])
 const connectionRef = ref(null)
+const displayNameRef = ref(null)
 
 // Ajouter une ref pour les achievements
 const currentAchievements = ref([])
 
 // Variable pour déclencher le reset des achievements
 const resetTrigger = ref(0)
+
+// Variable pour forcer la réactivité du nom d'affichage
+const displayNameTrigger = ref(0)
 
 // Fonction pour formater les grands nombres
 const formatNumber = (num) => {
@@ -305,6 +317,11 @@ const handleClearSaveData = (emptyData) => {
   console.log('Save data cleared completely')
 }
 
+// Fonction pour déclencher la mise à jour du nom d'affichage
+const refreshDisplayName = () => {
+  displayNameTrigger.value++
+}
+
 // Computed pour les données de jeu actuelles
 const currentGameData = computed(() => ({
   cookies: count.value,
@@ -314,6 +331,21 @@ const currentGameData = computed(() => ({
   achievements: currentAchievements.value,
   lastSaved: new Date().toISOString()
 }))
+
+// Computed pour le nom d'affichage
+const currentDisplayName = computed(() => {
+  // Utiliser le trigger pour forcer la réactivité
+  displayNameTrigger.value
+  
+  // Toujours vérifier localStorage en premier pour la cohérence
+  const saved = localStorage.getItem('cookieClicker_displayName')
+  if (saved && saved.trim()) {
+    return saved.trim()
+  }
+  
+  // Fallback approprié selon le statut de connexion
+  return (connectionRef.value?.isConnected && connectionRef.value?.username) ? connectionRef.value.username : 'Guest'
+})
 
 let interval = null
 const saveTimeout = ref(null)
