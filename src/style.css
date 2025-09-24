@@ -5,7 +5,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -28,6 +28,7 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
 }
 
 h1 {
@@ -68,7 +69,10 @@ button:focus-visible {
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
-    background-color: #ffffff;
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 50%, #d299c2 100%);
+  }
+  body {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 50%, #d299c2 100%);
   }
   a:hover {
     color: #747bff;

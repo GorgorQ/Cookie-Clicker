@@ -1,10 +1,5 @@
 <template>
   <div class="connection-container">
-    <!-- Utilisateur connecté -->
-    <div v-if="isConnected" class="user-info">
-      <span class="username">{{ username }}</span>
-    </div>
-
     <!-- Formulaire de connexion/inscription -->
     <div v-if="!isConnected && showForm" class="auth-form">
       <div class="form-tabs">
@@ -409,131 +404,223 @@ defineExpose({
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 400px;
+  width: 420px;
   max-width: 90vw;
-  background: #ffffff;
-  border: 1px solid #e1e5e9;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 4px 16px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
   z-index: 9999;
+  overflow: hidden;
+  animation: formSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Effet liquid glass animé en arrière-plan */
 .auth-form::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 0.1) 0deg,
+    rgba(255, 255, 255, 0.2) 60deg,
+    rgba(255, 255, 255, 0.1) 120deg,
+    rgba(255, 255, 255, 0.3) 180deg,
+    rgba(255, 255, 255, 0.1) 240deg,
+    rgba(255, 255, 255, 0.2) 300deg,
+    rgba(255, 255, 255, 0.1) 360deg
+  );
+  animation: liquidRotate 20s linear infinite;
+  z-index: -1;
+}
+
+/* Overlay pour adoucir l'effet */
+.auth-form::after {
   content: '';
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.5);
-  z-index: -1;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  z-index: -2;
+}
+
+@keyframes formSlideIn {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -60%) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes liquidRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .form-tabs {
   display: flex;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #e1e5e9;
+  margin-bottom: 25px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 4px;
+  backdrop-filter: blur(10px);
 }
 
 .tab-btn {
   flex: 1;
-  padding: 12px;
-  background: none;
+  padding: 12px 16px;
+  background: transparent;
   border: none;
-  color: #656d76;
-  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
   cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s ease;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
 }
 
 .tab-btn.active {
-  color: #0969da;
-  border-bottom-color: #0969da;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .tab-btn:hover {
-  color: #0969da;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  transform: translateY(-1px);
 }
 
 .form-content h3 {
-  margin: 0 0 16px 0;
-  color: #24292f;
-  font-size: 18px;
-  font-weight: 600;
+  margin: 0 0 20px 0;
+  color: white;
+  font-size: 20px;
+  font-weight: 700;
   text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .form-group input {
   width: 100%;
-  padding: 12px;
-  border: 1px solid #e1e5e9;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: border-color 0.2s ease;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  font-size: 16px;
+  color: white;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #0969da;
-  box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 0 0 2px rgba(255, 255, 255, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
 .submit-btn {
   width: 100%;
-  padding: 12px;
-  background: #0969da;
-  border: 1px solid #0969da;
-  border-radius: 6px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
   color: white;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 16px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  margin-bottom: 12px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-bottom: 16px;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .submit-btn:hover:not(:disabled) {
-  background: #0860ca;
-  border-color: #0860ca;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2));
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .submit-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
+  transform: none;
 }
 
 .cancel-btn {
   width: 100%;
-  padding: 10px;
-  background: #f6f8fa;
-  border: 1px solid #e1e5e9;
-  border-radius: 6px;
-  color: #24292f;
-  font-weight: 500;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cancel-btn:hover {
-  background: #eef2f5;
-  border-color: #d0d7de;
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+  transform: translateY(-1px);
 }
 
 .error-message {
-  margin-top: 12px;
-  padding: 8px 12px;
-  background: #fff1f0;
-  border: 1px solid #ffccc7;
-  border-radius: 6px;
-  color: #cf1322;
-  font-size: 13px;
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: rgba(255, 99, 132, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 99, 132, 0.3);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
   text-align: center;
+  animation: errorShake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }
 
 .connection-btn {
@@ -546,7 +633,7 @@ defineExpose({
   font-weight: bold;
   cursor: pointer;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   gap: 8px;
   transition: all 0.3s ease;
@@ -577,19 +664,5 @@ defineExpose({
   font-size: 18px;
 }
 
-.user-info {
-  background: rgba(40, 167, 69, 0.1);
-  border: 1px solid #28a745;
-  border-radius: 6px;
-  padding: 8px 12px;
-  color: #28a745;
-  font-size: 14px;
-  font-weight: bold;
-  width: 100%;
-  text-align: center;
-}
 
-.username::before {
-  content: '👤 ';
-}
 </style>

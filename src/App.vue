@@ -459,12 +459,13 @@ html, body, #app {
 }
 .center {
   gap: 50px;
+  padding-top: 3%;
 }
 .cookies-stats {
   text-align: center;
 }
 .cookie-btn {
-  width: 300px;
+  width: 350px;
   height: auto;
   cursor: pointer;
   border: none;
