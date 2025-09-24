@@ -28,22 +28,15 @@ defineEmits(['click'])
 .cookie-btn {
   width: 300px;
   height: auto;
-  border-radius: 50%;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
   cursor: pointer;
-  border: 3px solid #d2b48c;
-  background: #fff;
-  transition: transform 0.1s, box-shadow 0.1s, border-color 0.1s;
+  border: none;
+  background: transparent;
+  transition: transform 0.1s;
 }
 .cookie-btn:hover {
-  transform: scale(1.08);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-  border-color: #e2c48c;
+  transform: scale(1.05);
 }
 .cookie-btn:active {
   transform: scale(0.95);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  border-color: #b8860b;
-  filter: brightness(0.95);
 }
 </style>

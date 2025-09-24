@@ -12,25 +12,32 @@
     <div v-if="isOpen" class="ranking-dropdown">
       <div class="ranking-header">
         <h3>Top Players</h3>
-        <button @click="refreshRanking" class="refresh-btn">🔄</button>
       </div>
       
       <div class="ranking-list">
-        <div 
-          v-for="(player, index) in players" 
-          :key="player.id"
-          class="player-item"
-          :class="{ 'current-player': player.isCurrentPlayer }"
-        >
-          <div class="rank">
-            <span class="rank-number">{{ index + 1 }}</span>
-            <span class="medal">{{ getMedal(index) }}</span>
+        <div v-if="loading" class="loading">
+          🔄 Loading players...
+        </div>
+        <div v-else-if="players.length === 0" class="no-players">
+          No players found
+        </div>
+        <div v-else>
+          <div 
+            v-for="(player, index) in players" 
+            :key="player.id"
+            class="player-item"
+            :class="{ 'current-player': player.isCurrentPlayer }"
+          >
+            <div class="rank">
+              <span class="rank-number">{{ index + 1 }}</span>
+              <span class="medal">{{ getMedal(index) }}</span>
+            </div>
+            <div class="player-info">
+              <span class="player-name">{{ player.name }}</span>
+              <span class="player-score">{{ formatNumber(player.cookies) }} cookies</span>
+            </div>
+            <div class="player-cps">{{ formatNumber(player.cps) }} CPS</div>
           </div>
-          <div class="player-info">
-            <span class="player-name">{{ player.name }}</span>
-            <span class="player-score">{{ formatNumber(player.cookies) }} cookies</span>
-          </div>
-          <div class="player-cps">{{ formatNumber(player.cps) }} CPS</div>
         </div>
       </div>
     </div>
@@ -38,56 +45,91 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, watch, onUnmounted } from 'vue'
 
-const props = defineProps(['cookies', 'cps', 'playerName'])
+const props = defineProps(['cookies', 'cps', 'playerName', 'isConnected', 'username'])
 
 const isOpen = ref(false)
+const players = ref([])
+const loading = ref(false)
+const autoRefreshInterval = ref(null)
+const lastUpdate = ref(Date.now())
 
-const players = ref([
-  { id: 1, name: "CookieMaster", cookies: 15847293, cps: 25000, isCurrentPlayer: false },
-  { id: 2, name: "BakeQueen", cookies: 12934587, cps: 19500, isCurrentPlayer: false },
-  { id: 3, name: "ChocolateKing", cookies: 8456321, cps: 15200, isCurrentPlayer: false },
-  { id: 4, name: "SweetTooth", cookies: 6234789, cps: 12800, isCurrentPlayer: false },
-  { id: 5, name: "CrumbCollector", cookies: 4987654, cps: 9600, isCurrentPlayer: false },
-  { id: 6, name: "DoughMaster", cookies: 3456789, cps: 7400, isCurrentPlayer: false },
-  { id: 7, name: "OvenLord", cookies: 2345678, cps: 5200, isCurrentPlayer: false },
-  { id: 8, name: "FlourPower", cookies: 1234567, cps: 3800, isCurrentPlayer: false }
-])
+// Charger les données des joueurs depuis le JSON
+const loadPlayersData = async () => {
+  loading.value = true
+  try {
+    const response = await fetch('/users.json')
+    const data = await response.json()
+    
+    // Convertir les données des utilisateurs en format ranking
+    const rankingData = data.users
+      .filter(user => user.gameData && user.gameData.cookies > 0) // Filtrer les joueurs avec des cookies
+      .map((user, index) => ({
+        id: index + 1,
+        name: user.username,
+        cookies: user.gameData.cookies || 0,
+        cps: user.gameData.cps || 0,
+        isCurrentPlayer: false
+      }))
+    
+    players.value = rankingData
+    console.log('Players data loaded:', players.value)
+    
+  } catch (error) {
+    console.error('Error loading players data:', error)
+    // Données de fallback en cas d'erreur
+    players.value = [
+      { id: 1, name: "CookieMaster", cookies: 15847293, cps: 25000, isCurrentPlayer: false },
+      { id: 2, name: "BakeQueen", cookies: 12934587, cps: 19500, isCurrentPlayer: false },
+      { id: 3, name: "ChocolateKing", cookies: 8456321, cps: 15200, isCurrentPlayer: false }
+    ]
+  } finally {
+    loading.value = false
+  }
+}
 
-const toggleDropdown = () => {
+const toggleDropdown = async () => {
   isOpen.value = !isOpen.value
   if (isOpen.value) {
+    await loadPlayersData()
     updateCurrentPlayer()
   }
 }
 
-const refreshRanking = () => {
-  // Simulation d'actualisation des données
-  console.log("Refreshing ranking...")
-  updateCurrentPlayer()
-}
+
 
 const updateCurrentPlayer = () => {
-  // Ajouter/mettre à jour le joueur actuel
+  // Déterminer le nom du joueur actuel
+  let currentPlayerName
+  if (props.isConnected && props.username) {
+    currentPlayerName = props.username
+  } else {
+    currentPlayerName = "Guest"
+  }
+  
+  // Retirer l'ancien joueur actuel et le joueur connecté s'il existe déjà dans la liste
+  players.value = players.value.filter(p => !p.isCurrentPlayer && p.name !== currentPlayerName)
+  
+  // Ajouter le joueur actuel avec ses stats en temps réel
   const currentPlayerData = {
     id: 999,
-    name: props.playerName || "You",
+    name: currentPlayerName,
     cookies: props.cookies || 0,
     cps: props.cps || 0,
     isCurrentPlayer: true
   }
   
-  // Retirer l'ancien joueur actuel
-  const existingIndex = players.value.findIndex(p => p.isCurrentPlayer)
-  if (existingIndex !== -1) {
-    players.value.splice(existingIndex, 1)
-  }
-  
-  // Ajouter le nouveau et trier
   players.value.push(currentPlayerData)
+  
+  // Trier par nombre de cookies (ordre décroissant)
   players.value.sort((a, b) => b.cookies - a.cookies)
 }
+
+// Charger les données au montage du composant
+onMounted(() => {
+  loadPlayersData()
+})
 
 const getMedal = (index) => {
   if (index === 0) return "🥇"
@@ -102,6 +144,60 @@ const formatNumber = (num) => {
   if (num >= 1e3) return (num / 1e3).toFixed(1) + "K"
   return num.toString()
 }
+
+// Démarrer/arrêter la mise à jour automatique
+const startAutoRefresh = () => {
+  if (!autoRefreshInterval.value) {
+    autoRefreshInterval.value = setInterval(() => {
+      if (isOpen.value) {
+        updateCurrentPlayer() // Mise à jour rapide du joueur actuel
+        
+        // Mise à jour complète toutes les 30 secondes
+        if (Date.now() - lastUpdate.value > 30000) {
+          loadPlayersData().then(() => {
+            updateCurrentPlayer()
+            lastUpdate.value = Date.now()
+          })
+        }
+      }
+    }, 5000) // Vérification toutes les 5 secondes
+  }
+}
+
+const stopAutoRefresh = () => {
+  if (autoRefreshInterval.value) {
+    clearInterval(autoRefreshInterval.value)
+    autoRefreshInterval.value = null
+  }
+}
+
+// Watcher pour mettre à jour le ranking quand les cookies du joueur changent
+watch(() => props.cookies, () => {
+  if (isOpen.value) {
+    updateCurrentPlayer()
+  }
+})
+
+// Watcher pour mettre à jour quand le statut de connexion change
+watch(() => props.isConnected, () => {
+  if (isOpen.value) {
+    updateCurrentPlayer()
+  }
+})
+
+// Démarrer la mise à jour auto quand le dropdown s'ouvre
+watch(isOpen, (newValue) => {
+  if (newValue) {
+    startAutoRefresh()
+  } else {
+    stopAutoRefresh()
+  }
+})
+
+// Nettoyer l'intervalle à la destruction du composant
+onUnmounted(() => {
+  stopAutoRefresh()
+})
 </script>
 
 <style scoped>
@@ -168,12 +264,14 @@ const formatNumber = (num) => {
 
 .ranking-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 15px;
   background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   border-bottom: 1px solid #dee2e6;
 }
+
+
 
 .ranking-header h3 {
   margin: 0;
@@ -181,19 +279,7 @@ const formatNumber = (num) => {
   font-size: 18px;
 }
 
-.refresh-btn {
-  background: none;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
-  padding: 5px;
-  border-radius: 4px;
-  transition: background 0.2s;
-}
 
-.refresh-btn:hover {
-  background: rgba(0, 0, 0, 0.1);
-}
 
 .ranking-list {
   padding: 10px;
@@ -217,6 +303,27 @@ const formatNumber = (num) => {
   background: linear-gradient(135deg, #fff3cd, #ffeaa7);
   border: 2px solid #ffc107;
   font-weight: bold;
+  position: relative;
+}
+
+.player-item.current-player::after {
+  content: "YOU";
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  background: #ffc107;
+  color: #495057;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.7em;
+  font-weight: bold;
+}
+
+.loading, .no-players {
+  text-align: center;
+  padding: 20px;
+  color: #6c757d;
+  font-style: italic;
 }
 
 .rank {

@@ -82,36 +82,64 @@ watch(() => props.isConnected, (connected) => {
 
 // Exporter la sauvegarde (disponible pour tous)
 const exportSave = () => {
-  if (!props.gameData) {
-    alert('No save data to export!')
-    return
+  console.log('Export save clicked')
+  console.log('Props gameData:', props.gameData)
+  
+  try {
+    // Obtenir les données depuis localStorage directement
+    const localData = localStorage.getItem('cookieClickerSave')
+    let saveData
+    
+    if (localData) {
+      console.log('Using localStorage data')
+      saveData = JSON.parse(localData)
+    } else if (props.gameData) {
+      console.log('Using props gameData')
+      saveData = props.gameData
+    } else {
+      console.log('No data available')
+      alert('No save data to export! Play the game first.')
+      return
+    }
+    
+    // Créer l'objet d'export
+    const exportData = {
+      version: "1.0",
+      player: props.isConnected ? props.username : 'Guest',
+      cookies: saveData.cookies || 0,
+      totalClicks: saveData.totalClicks || 0,
+      cps: saveData.cps || 0,
+      upgrades: saveData.upgrades || [],
+      achievements: saveData.achievements || [],
+      exportDate: new Date().toISOString()
+    }
+    
+    console.log('Export data prepared:', exportData)
+    
+    // Encoder en base64 de manière sécurisée pour gérer les caractères Unicode
+    const jsonString = JSON.stringify(exportData)
+    const exportString = btoa(unescape(encodeURIComponent(jsonString)))
+    
+    // Créer et télécharger le fichier
+    const filename = `${props.isConnected ? props.username : 'guest'}_save.txt`
+    
+    // Méthode simple de téléchargement
+    const element = document.createElement('a')
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(exportString))
+    element.setAttribute('download', filename)
+    element.style.display = 'none'
+    
+    document.body.appendChild(element)
+    element.click()
+    document.body.removeChild(element)
+    
+    console.log('Export completed')
+    alert('Save exported successfully!')
+    
+  } catch (error) {
+    console.error('Export error:', error)
+    alert(`Export failed: ${error.message}`)
   }
-  
-  const saveData = {
-    version: "1.0",
-    player: props.isConnected ? props.username : 'Guest',
-    cookies: props.gameData.cookies || 0,
-    totalClicks: props.gameData.totalClicks || 0,
-    cps: props.gameData.cps || 0,
-    upgrades: props.gameData.upgrades || [],
-    achievements: props.gameData.achievements || [],
-    exportDate: new Date().toISOString()
-  }
-  
-  const saveString = btoa(JSON.stringify(saveData))
-  
-  const blob = new Blob([saveString], { type: 'text/plain' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `${props.isConnected ? props.username : 'guest'}_cookie_save.txt`
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-  
-  console.log('Save exported for', props.isConnected ? props.username : 'Guest')
-  alert('Save exported successfully!')
 }
 
 // Déclencher l'import (disponible pour tous)
@@ -131,9 +159,16 @@ const importSave = (event) => {
       let saveData
       
       try {
-        saveData = JSON.parse(atob(saveString))
+        // Essayer d'abord avec la nouvelle méthode de décodage (gère Unicode)
+        saveData = JSON.parse(decodeURIComponent(escape(atob(saveString))))
       } catch {
-        saveData = JSON.parse(saveString)
+        try {
+          // Fallback vers l'ancienne méthode
+          saveData = JSON.parse(atob(saveString))
+        } catch {
+          // Fallback vers JSON direct (non encodé)
+          saveData = JSON.parse(saveString)
+        }
       }
       
       if (typeof saveData.cookies !== 'number' || saveData.cookies < 0) {
