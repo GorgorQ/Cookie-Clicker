@@ -470,13 +470,56 @@ html, body, #app {
   cursor: pointer;
   border: none;
   background: transparent;
-  transition: transform 0.1s;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  
+  /* Effet de halo doré plus doux */
+  filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.4))
+          drop-shadow(0 0 30px rgba(255, 215, 0, 0.3))
+          drop-shadow(0 0 45px rgba(255, 193, 77, 0.2))
+          drop-shadow(0 0 60px rgba(255, 165, 0, 0.1));
+  animation: cookieGlow 3s ease-in-out infinite alternate;
 }
+
+
+
 .cookie-btn:hover {
   transform: scale(1.05);
+  filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.5))
+          drop-shadow(0 0 40px rgba(255, 215, 0, 0.4))
+          drop-shadow(0 0 60px rgba(255, 193, 77, 0.3))
+          drop-shadow(0 0 80px rgba(255, 165, 0, 0.2));
 }
+
 .cookie-btn:active {
   transform: scale(0.95);
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6))
+          drop-shadow(0 0 20px rgba(255, 215, 0, 0.4))
+          drop-shadow(0 0 30px rgba(255, 193, 77, 0.3));
+}
+
+@keyframes cookieGlow {
+  0% {
+    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.4))
+            drop-shadow(0 0 30px rgba(255, 215, 0, 0.3))
+            drop-shadow(0 0 45px rgba(255, 193, 77, 0.2))
+            drop-shadow(0 0 60px rgba(255, 165, 0, 0.1));
+  }
+  100% {
+    filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.5))
+            drop-shadow(0 0 50px rgba(255, 215, 0, 0.4))
+            drop-shadow(0 0 75px rgba(255, 193, 77, 0.3))
+            drop-shadow(0 0 100px rgba(255, 165, 0, 0.2));
+  }
+}
+
+@keyframes rotateLight {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .right {

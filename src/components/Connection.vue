@@ -63,12 +63,12 @@
           />
         </div>
         <button @click="signup" class="submit-btn" :disabled="!canSignup">
-          ✨ Sign Up
+           Sign Up
         </button>
       </div>
 
       <button @click="showForm = false" class="cancel-btn">
-        ❌ Cancel
+         Cancel
       </button>
 
       <div v-if="errorMessage" class="error-message">
@@ -603,6 +603,12 @@ defineExpose({
   transform: translateY(-1px);
 }
 
+.submit-btn:focus,
+.cancel-btn:focus,
+.tab-btn:focus {
+  outline: none;
+}
+
 .error-message {
   margin-top: 16px;
   padding: 12px 16px;
@@ -626,9 +632,13 @@ defineExpose({
 .connection-btn {
   width: 100%;
   padding: 16px 20px;
-  background: linear-gradient(135deg, #dc3545, #c82333);
-  border: 2px solid #c82333;
-  border-radius: 8px;
+  background: 
+    linear-gradient(135deg, rgba(220, 53, 69, 0.8), rgba(200, 35, 51, 0.9)),
+    rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  border-radius: 12px;
   color: white;
   font-weight: bold;
   cursor: pointer;
@@ -636,28 +646,75 @@ defineExpose({
   justify-content: flex-start;
   align-items: center;
   gap: 8px;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   font-size: 16px;
   min-height: 60px;
+  box-shadow: 
+    0 4px 16px rgba(220, 53, 69, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.connection-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, 
+    transparent 30%, 
+    rgba(255, 255, 255, 0.1) 50%, 
+    transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.connection-btn:hover::before {
+  transform: translateX(100%);
 }
 
 .connection-btn.connected {
-  background: linear-gradient(135deg, #28a745, #218838);
-  border-color: #218838;
+  background: 
+    linear-gradient(135deg, rgba(40, 167, 69, 0.8), rgba(33, 136, 56, 0.9)),
+    rgba(255, 255, 255, 0.1);
+  border-color: rgba(40, 167, 69, 0.3);
+  box-shadow: 
+    0 4px 16px rgba(40, 167, 69, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .connection-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  background: 
+    linear-gradient(135deg, rgba(220, 53, 69, 0.9), rgba(200, 35, 51, 1)),
+    rgba(255, 255, 255, 0.15);
+  border-color: rgba(220, 53, 69, 0.4);
+  box-shadow: 
+    0 6px 20px rgba(220, 53, 69, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .connection-btn.connected:hover {
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  background: 
+    linear-gradient(135deg, rgba(40, 167, 69, 0.9), rgba(33, 136, 56, 1)),
+    rgba(255, 255, 255, 0.15);
+  border-color: rgba(40, 167, 69, 0.4);
+  box-shadow: 
+    0 6px 20px rgba(40, 167, 69, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .connection-btn:active {
   transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.connection-btn:focus {
+  outline: none;
 }
 
 .icon {

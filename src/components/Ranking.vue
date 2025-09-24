@@ -188,28 +188,71 @@ watch(() => props.username, () => {
 .ranking-btn {
   width: 100%;
   padding: 16px 20px;
-  background: linear-gradient(135deg, #007bff, #0056b3);
-  border: 2px solid #0056b3;
-  border-radius: 8px;
+  background: 
+    linear-gradient(135deg, rgba(0, 123, 255, 0.8), rgba(0, 86, 179, 0.9)),
+    rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(0, 123, 255, 0.3);
+  border-radius: 12px;
   color: white;
   font-weight: bold;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   font-size: 16px;
   min-height: 60px;
+  box-shadow: 
+    0 4px 16px rgba(0, 123, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.ranking-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, 
+    transparent 30%, 
+    rgba(255, 255, 255, 0.1) 50%, 
+    transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.ranking-btn:hover::before {
+  transform: translateX(100%);
 }
 
 .ranking-btn:hover {
-  background: linear-gradient(135deg, #0056b3, #004085);
+  background: 
+    linear-gradient(135deg, rgba(0, 123, 255, 0.9), rgba(0, 86, 179, 1)),
+    rgba(255, 255, 255, 0.15);
+  border-color: rgba(0, 123, 255, 0.4);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  box-shadow: 
+    0 6px 20px rgba(0, 123, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .ranking-btn.active {
-  background: linear-gradient(135deg, #0056b3, #007bff);
+  background: 
+    linear-gradient(135deg, rgba(0, 86, 179, 0.9), rgba(0, 123, 255, 0.8)),
+    rgba(255, 255, 255, 0.15);
+  border-color: rgba(0, 123, 255, 0.4);
+  box-shadow: 
+    0 4px 16px rgba(0, 123, 255, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.ranking-btn:focus {
+  outline: none;
 }
 
 .arrow {
