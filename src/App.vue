@@ -340,11 +340,14 @@ const currentDisplayName = computed(() => {
   // Toujours vérifier localStorage en premier pour la cohérence
   const saved = localStorage.getItem('cookieClicker_displayName')
   if (saved && saved.trim()) {
+    console.log('currentDisplayName: using saved name:', saved.trim())
     return saved.trim()
   }
   
   // Fallback approprié selon le statut de connexion
-  return (connectionRef.value?.isConnected && connectionRef.value?.username) ? connectionRef.value.username : 'Guest'
+  const fallbackName = (connectionRef.value?.isConnected && connectionRef.value?.username) ? connectionRef.value.username : 'Guest'
+  console.log('currentDisplayName: using fallback:', fallbackName)
+  return fallbackName
 })
 
 let interval = null

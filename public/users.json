@@ -43,6 +43,121 @@
         "achievements": [],
         "lastSaved": "2024-01-03T00:00:00.000Z"
       }
+    },
+    {
+      "username": "CookieMaster",
+      "password": "cookies123",
+      "createdAt": "2024-01-04T00:00:00.000Z",
+      "gameData": {
+        "cookies": 15847293,
+        "totalClicks": 85000,
+        "cps": 25000,
+        "upgrades": [
+          { "id": 1, "name": "Cursor", "owned": 50, "price": 500 },
+          { "id": 2, "name": "Grandma", "owned": 30, "price": 2000 },
+          { "id": 3, "name": "Farm", "owned": 20, "price": 15000 },
+          { "id": 4, "name": "Mine", "owned": 15, "price": 85000 }
+        ],
+        "achievements": ["first_click", "hundred_cookies", "thousand_cookies"],
+        "lastSaved": "2024-09-24T12:00:00.000Z"
+      }
+    },
+    {
+      "username": "BakeQueen",
+      "password": "bakery456",
+      "createdAt": "2024-01-05T00:00:00.000Z",
+      "gameData": {
+        "cookies": 12934587,
+        "totalClicks": 67000,
+        "cps": 19500,
+        "upgrades": [
+          { "id": 1, "name": "Cursor", "owned": 45, "price": 450 },
+          { "id": 2, "name": "Grandma", "owned": 25, "price": 1800 },
+          { "id": 3, "name": "Farm", "owned": 18, "price": 12000 }
+        ],
+        "achievements": ["first_click", "hundred_cookies"],
+        "lastSaved": "2024-09-24T11:30:00.000Z"
+      }
+    },
+    {
+      "username": "ChocolateKing",
+      "password": "choco789",
+      "createdAt": "2024-01-06T00:00:00.000Z",
+      "gameData": {
+        "cookies": 8456321,
+        "totalClicks": 45000,
+        "cps": 15200,
+        "upgrades": [
+          { "id": 1, "name": "Cursor", "owned": 35, "price": 350 },
+          { "id": 2, "name": "Grandma", "owned": 20, "price": 1500 },
+          { "id": 3, "name": "Farm", "owned": 12, "price": 8000 }
+        ],
+        "achievements": ["first_click"],
+        "lastSaved": "2024-09-24T10:45:00.000Z"
+      }
+    },
+    {
+      "username": "SweetDreamer",
+      "password": "dream123",
+      "createdAt": "2024-01-07T00:00:00.000Z",
+      "gameData": {
+        "cookies": 5234567,
+        "totalClicks": 28000,
+        "cps": 8900,
+        "upgrades": [
+          { "id": 1, "name": "Cursor", "owned": 25, "price": 250 },
+          { "id": 2, "name": "Grandma", "owned": 15, "price": 1200 }
+        ],
+        "achievements": ["first_click", "hundred_cookies"],
+        "lastSaved": "2024-09-24T09:15:00.000Z"
+      }
+    },
+    {
+      "username": "CrunchyBaker",
+      "password": "crunch456",
+      "createdAt": "2024-01-08T00:00:00.000Z",
+      "gameData": {
+        "cookies": 3789456,
+        "totalClicks": 19000,
+        "cps": 6700,
+        "upgrades": [
+          { "id": 1, "name": "Cursor", "owned": 20, "price": 200 },
+          { "id": 2, "name": "Grandma", "owned": 12, "price": 1000 }
+        ],
+        "achievements": [],
+        "lastSaved": "2024-09-24T08:30:00.000Z"
+      }
+    },
+    {
+      "username": "GoldenCookie",
+      "password": "golden789",
+      "createdAt": "2024-01-09T00:00:00.000Z",
+      "gameData": {
+        "cookies": 2567890,
+        "totalClicks": 15000,
+        "cps": 4500,
+        "upgrades": [
+          { "id": 1, "name": "Cursor", "owned": 18, "price": 180 },
+          { "id": 2, "name": "Grandma", "owned": 8, "price": 800 }
+        ],
+        "achievements": ["first_click"],
+        "lastSaved": "2024-09-24T07:45:00.000Z"
+      }
+    },
+    {
+      "username": "CinnamonStar",
+      "password": "cinnamon789",
+      "createdAt": "2024-01-12T00:00:00.000Z",
+      "gameData": {
+        "cookies": 456789,
+        "totalClicks": 3200,
+        "cps": 950,
+        "upgrades": [
+          { "id": 1, "name": "Cursor", "owned": 8, "price": 80 }
+        ],
+        "achievements": ["first_click"],
+        "lastSaved": "2024-09-24T04:30:00.000Z"
+      }
     }
   ]
 }

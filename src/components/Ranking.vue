@@ -45,15 +45,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, onUnmounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 
 const props = defineProps(['cookies', 'cps', 'playerName', 'isConnected', 'username'])
 
 const isOpen = ref(false)
 const players = ref([])
 const loading = ref(false)
-const autoRefreshInterval = ref(null)
-const lastUpdate = ref(Date.now())
+
 
 // Charger les données des joueurs depuis le JSON
 const loadPlayersData = async () => {
@@ -103,6 +102,14 @@ const updateCurrentPlayer = () => {
   // Déterminer le nom du joueur actuel - utiliser toujours props.username (qui contient le display name)
   let currentPlayerName = props.username || "Guest"
   
+  console.log('updateCurrentPlayer called with:', {
+    username: props.username,
+    isConnected: props.isConnected,
+    cookies: props.cookies,
+    cps: props.cps,
+    currentPlayerName
+  })
+  
   // Retirer l'ancien joueur actuel et le joueur connecté s'il existe déjà dans la liste
   players.value = players.value.filter(p => !p.isCurrentPlayer && p.name !== currentPlayerName)
   
@@ -117,13 +124,18 @@ const updateCurrentPlayer = () => {
   
   players.value.push(currentPlayerData)
   
+  console.log('Current player added to ranking:', currentPlayerData)
+  console.log('All players:', players.value)
+  
   // Trier par nombre de cookies (ordre décroissant)
   players.value.sort((a, b) => b.cookies - a.cookies)
 }
 
 // Charger les données au montage du composant
 onMounted(() => {
-  loadPlayersData()
+  loadPlayersData().then(() => {
+    updateCurrentPlayer() // S'assurer que le joueur actuel est ajouté dès le début
+  })
 })
 
 const getMedal = (index) => {
@@ -140,31 +152,7 @@ const formatNumber = (num) => {
   return num.toString()
 }
 
-// Démarrer/arrêter la mise à jour automatique
-const startAutoRefresh = () => {
-  if (!autoRefreshInterval.value) {
-    autoRefreshInterval.value = setInterval(() => {
-      if (isOpen.value) {
-        updateCurrentPlayer() // Mise à jour rapide du joueur actuel
-        
-        // Mise à jour complète toutes les 30 secondes
-        if (Date.now() - lastUpdate.value > 30000) {
-          loadPlayersData().then(() => {
-            updateCurrentPlayer()
-            lastUpdate.value = Date.now()
-          })
-        }
-      }
-    }, 5000) // Vérification toutes les 5 secondes
-  }
-}
 
-const stopAutoRefresh = () => {
-  if (autoRefreshInterval.value) {
-    clearInterval(autoRefreshInterval.value)
-    autoRefreshInterval.value = null
-  }
-}
 
 // Watcher pour mettre à jour le ranking quand les cookies du joueur changent
 watch(() => props.cookies, () => {
@@ -187,19 +175,7 @@ watch(() => props.username, () => {
   }
 })
 
-// Démarrer la mise à jour auto quand le dropdown s'ouvre
-watch(isOpen, (newValue) => {
-  if (newValue) {
-    startAutoRefresh()
-  } else {
-    stopAutoRefresh()
-  }
-})
 
-// Nettoyer l'intervalle à la destruction du composant
-onUnmounted(() => {
-  stopAutoRefresh()
-})
 </script>
 
 <style scoped>
@@ -254,14 +230,20 @@ onUnmounted(() => {
   border: 2px solid #0056b3;
   border-top: none;
   border-radius: 0 0 8px 8px;
-  max-height: 400px;
+  max-height: 40vh; /* Réduire un peu pour éviter de sortir de l'écran */
   overflow-y: auto;
   z-index: 1000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
+/* Cacher la barre de défilement */
 .ranking-dropdown::-webkit-scrollbar {
   display: none;
+}
+
+.ranking-dropdown {
+  -ms-overflow-style: none;  /* IE et Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
 .ranking-header {
@@ -285,6 +267,7 @@ onUnmounted(() => {
 
 .ranking-list {
   padding: 10px;
+  padding-bottom: 40px; /* Encore plus d'espace en bas pour voir le dernier élément */
 }
 
 .player-item {
