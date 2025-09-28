@@ -39,7 +39,7 @@
           />
         </div>
         <button @click="signin" class="submit-btn" :disabled="!canSignin">
-          🔐 Sign In
+           Sign In
         </button>
       </div>
 
