@@ -2,6 +2,12 @@
 
 Un jeu de clicker moderne et interactif développé avec Vue 3, Vite et une interface utilisateur élégante. Cliquez sur le cookie pour accumuler des points et débloquer des améliorations !
 
+## 🌐 Démo en Ligne
+
+**🎮 Jouez maintenant :** [https://cookie-clicker-neon.vercel.app/](https://cookie-clicker-neon.vercel.app/)
+
+*Testez l'application directement dans votre navigateur !*
+
 ## 🎮 Fonctionnalités
 
 ### 🎯 Jeu Principal
