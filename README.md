@@ -140,9 +140,6 @@ Le fichier `public/users.json` contient les données des utilisateurs avec des c
 - **player1** / password (50K cookies)
 - **CookieMaster** / cookies123 (15M+ cookies)
 
-## 📈 Roadmap
-
-
 
 ## 📄 License
 
