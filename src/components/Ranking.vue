@@ -54,16 +54,16 @@ const players = ref([])
 const loading = ref(false)
 
 
-// Charger les données des joueurs depuis le JSON
+
 const loadPlayersData = async () => {
   loading.value = true
   try {
     const response = await fetch('/users.json')
     const data = await response.json()
     
-    // Convertir les données des utilisateurs en format ranking
+
     const rankingData = data.users
-      .filter(user => user.gameData && user.gameData.cookies > 0) // Filtrer les joueurs avec des cookies
+      .filter(user => user.gameData && user.gameData.cookies > 0)
       .map((user, index) => ({
         id: index + 1,
         name: user.username,
@@ -77,7 +77,7 @@ const loadPlayersData = async () => {
     
   } catch (error) {
     console.error('Error loading players data:', error)
-    // Données de fallback en cas d'erreur
+
     players.value = [
       { id: 1, name: "CookieMaster", cookies: 15847293, cps: 25000, isCurrentPlayer: false },
       { id: 2, name: "BakeQueen", cookies: 12934587, cps: 19500, isCurrentPlayer: false },
@@ -99,7 +99,7 @@ const toggleDropdown = async () => {
 
 
 const updateCurrentPlayer = () => {
-  // Déterminer le nom du joueur actuel - utiliser toujours props.username (qui contient le display name)
+
   let currentPlayerName = props.username || "Guest"
   
   console.log('updateCurrentPlayer called with:', {
@@ -110,10 +110,10 @@ const updateCurrentPlayer = () => {
     currentPlayerName
   })
   
-  // Retirer l'ancien joueur actuel et le joueur connecté s'il existe déjà dans la liste
+
   players.value = players.value.filter(p => !p.isCurrentPlayer && p.name !== currentPlayerName)
   
-  // Ajouter le joueur actuel avec ses stats en temps réel
+
   const currentPlayerData = {
     id: 999,
     name: currentPlayerName,
@@ -127,14 +127,14 @@ const updateCurrentPlayer = () => {
   console.log('Current player added to ranking:', currentPlayerData)
   console.log('All players:', players.value)
   
-  // Trier par nombre de cookies (ordre décroissant)
+
   players.value.sort((a, b) => b.cookies - a.cookies)
 }
 
-// Charger les données au montage du composant
+
 onMounted(() => {
   loadPlayersData().then(() => {
-    updateCurrentPlayer() // S'assurer que le joueur actuel est ajouté dès le début
+    updateCurrentPlayer()
   })
 })
 
@@ -154,21 +154,21 @@ const formatNumber = (num) => {
 
 
 
-// Watcher pour mettre à jour le ranking quand les cookies du joueur changent
+
 watch(() => props.cookies, () => {
   if (isOpen.value) {
     updateCurrentPlayer()
   }
 })
 
-// Watcher pour mettre à jour quand le statut de connexion change
+
 watch(() => props.isConnected, () => {
   if (isOpen.value) {
     updateCurrentPlayer()
   }
 })
 
-// Watcher pour mettre à jour quand le username/display name change
+
 watch(() => props.username, () => {
   if (isOpen.value) {
     updateCurrentPlayer()

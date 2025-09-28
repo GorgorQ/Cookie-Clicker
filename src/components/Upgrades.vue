@@ -122,15 +122,15 @@ const cookiesPerSecond = computed(() => {
   }, 0)
 })
 
-// Émet le CPS chaque fois qu'il change
+
 watch(cookiesPerSecond, (newCps) => {
   emit('cps-update', newCps)
 }, { immediate: true })
 
-// Restaurer les upgrades sauvegardés
+
 watch(() => props.savedUpgrades, (savedUpgrades) => {
   if (savedUpgrades && savedUpgrades.length > 0) {
-    // Fusionner les upgrades sauvegardés avec les upgrades par défaut
+
     upgrades.value.forEach(upgrade => {
       const savedUpgrade = savedUpgrades.find(s => s.id === upgrade.id)
       if (savedUpgrade) {
@@ -141,7 +141,7 @@ watch(() => props.savedUpgrades, (savedUpgrades) => {
   }
 }, { immediate: true })
 
-// Émet les upgrades à chaque changement
+
 watch(upgrades, (newUpgrades) => {
   emit('upgrades-update', newUpgrades)
 }, { deep: true, immediate: true })

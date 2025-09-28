@@ -73,20 +73,20 @@ const toggleDropdown = () => {
   isOpen.value = !isOpen.value
 }
 
-// Fermer le dropdown si l'utilisateur se déconnecte
+
 watch(() => props.isConnected, (connected) => {
   if (!connected) {
     isOpen.value = false
   }
 })
 
-// Exporter la sauvegarde (disponible pour tous)
+
 const exportSave = () => {
   console.log('Export save clicked')
   console.log('Props gameData:', props.gameData)
   
   try {
-    // Obtenir les données depuis localStorage directement
+
     const localData = localStorage.getItem('cookieClickerSave')
     let saveData
     
@@ -102,7 +102,7 @@ const exportSave = () => {
       return
     }
     
-    // Créer l'objet d'export
+
     const exportData = {
       version: "1.0",
       player: props.displayName || (props.isConnected ? props.username : 'Guest'),
@@ -116,15 +116,15 @@ const exportSave = () => {
     
     console.log('Export data prepared:', exportData)
     
-    // Encoder en base64 de manière sécurisée pour gérer les caractères Unicode
+
     const jsonString = JSON.stringify(exportData)
     const exportString = btoa(unescape(encodeURIComponent(jsonString)))
     
-    // Créer et télécharger le fichier
+
     const displayNameForFile = props.displayName || (props.isConnected ? props.username : 'guest')
     const filename = `${displayNameForFile.toLowerCase().replace(/\s+/g, '_')}_save.txt`
     
-    // Méthode simple de téléchargement
+
     const element = document.createElement('a')
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(exportString))
     element.setAttribute('download', filename)
@@ -143,12 +143,12 @@ const exportSave = () => {
   }
 }
 
-// Déclencher l'import (disponible pour tous)
+
 const triggerImport = () => {
   fileInput.value?.click()
 }
 
-// Importer la sauvegarde (disponible pour tous)
+
 const importSave = (event) => {
   const file = event.target.files[0]
   if (!file) return
@@ -160,14 +160,14 @@ const importSave = (event) => {
       let saveData
       
       try {
-        // Essayer d'abord avec la nouvelle méthode de décodage (gère Unicode)
+
         saveData = JSON.parse(decodeURIComponent(escape(atob(saveString))))
       } catch {
         try {
-          // Fallback vers l'ancienne méthode
+
           saveData = JSON.parse(atob(saveString))
         } catch {
-          // Fallback vers JSON direct (non encodé)
+
           saveData = JSON.parse(saveString)
         }
       }
@@ -209,7 +209,7 @@ const importSave = (event) => {
   event.target.value = ''
 }
 
-// Effacer la sauvegarde (disponible pour tous)
+
 const clearSave = () => {
   const confirmClear = confirm(
     'Are you sure you want to clear your save?\n' +
@@ -221,12 +221,12 @@ const clearSave = () => {
   
   if (!confirmClear) return
   
-  // Les données vides - les upgrades seront gérés par App.vue
+
   const emptyData = {
     cookies: 0,
     totalClicks: 0,
     cps: 0,
-    upgrades: [], // App.vue gérera la réinitialisation complète
+    upgrades: [],
     achievements: [],
     lastSaved: new Date().toISOString()
   }
@@ -237,7 +237,7 @@ const clearSave = () => {
   alert('Save cleared successfully!')
 }
 
-// Utilitaires
+
 const formatNumber = (num) => {
   if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B'
   if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M'

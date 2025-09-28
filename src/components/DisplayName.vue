@@ -18,17 +18,17 @@ const emit = defineEmits(['display-name-changed'])
 
 const displayName = ref('')
 
-// Nom d'affichage actuel pour l'exposition
+
 const currentDisplayName = computed(() => {
-  // Si on a un nom personnalisé, l'utiliser
+
   if (displayName.value && displayName.value.trim()) {
     return displayName.value.trim()
   }
-  // Sinon, utiliser le fallback approprié
+
   return props.isConnected && props.username ? props.username : 'Guest'
 })
 
-// Charger le nom d'affichage au montage
+
 const loadDisplayName = () => {
   const saved = localStorage.getItem('cookieClicker_displayName')
   if (saved) {
@@ -36,7 +36,7 @@ const loadDisplayName = () => {
   }
 }
 
-// Sauvegarder le nom d'affichage
+
 const saveDisplayName = () => {
   const trimmedName = displayName.value.trim()
   
@@ -44,18 +44,18 @@ const saveDisplayName = () => {
     localStorage.setItem('cookieClicker_displayName', trimmedName)
     console.log('Display name saved:', trimmedName)
   } else if (trimmedName === '') {
-    // Si l'utilisateur efface tout, supprimer du localStorage
+
     localStorage.removeItem('cookieClicker_displayName')
     console.log('Display name cleared')
   }
   
-  // Toujours notifier le parent pour déclencher la réactivité
+
   emit('display-name-changed')
 }
 
 
 
-// Watcher pour sauvegarder automatiquement à chaque changement
+
 watch(displayName, (newValue) => {
   saveDisplayName()
 }, { immediate: false })
@@ -64,7 +64,7 @@ onMounted(() => {
   loadDisplayName()
 })
 
-// Exposer le nom d'affichage pour que App.vue puisse l'utiliser
+
 defineExpose({
   currentDisplayName
 })

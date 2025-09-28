@@ -95,7 +95,7 @@ const achievements = ref([
   }
 ])
 
-// Fonction pour afficher une notification
+
 const showNotification = (message, icon = '🎉') => {
   const id = Date.now()
   const notification = {
@@ -107,12 +107,12 @@ const showNotification = (message, icon = '🎉') => {
   
   notifications.value.push(notification)
   
-  // Animation d'entrée
+
   nextTick(() => {
     notification.show = true
   })
   
-  // Supprimer après 3 secondes
+
   setTimeout(() => {
     notification.show = false
     setTimeout(() => {
@@ -120,11 +120,11 @@ const showNotification = (message, icon = '🎉') => {
       if (index > -1) {
         notifications.value.splice(index, 1)
       }
-    }, 500) // Délai pour l'animation de sortie
+    }, 500)
   }, 3000)
 }
 
-// Fonction pour vérifier les succès
+
 const checkAchievements = () => {
   let hasNewAchievement = false
   
@@ -136,13 +136,13 @@ const checkAchievements = () => {
     }
   })
   
-  // Émettre les achievements mis à jour
+
   if (hasNewAchievement) {
     emit('achievements-update', achievements.value)
   }
 }
 
-// Fonction pour réinitialiser tous les achievements
+
 const resetAchievements = () => {
   achievements.value.forEach(achievement => {
     achievement.unlocked = false
@@ -151,19 +151,19 @@ const resetAchievements = () => {
   console.log('Achievements reset to default state')
 }
 
-// Écouter le trigger de reset
+
 watch(() => props.resetTrigger, (newValue) => {
   if (newValue > 0) {
     resetAchievements()
   }
 })
 
-// Émettre les achievements au montage du composant
+
 onMounted(() => {
   emit('achievements-update', achievements.value)
 })
 
-// Surveiller les changements des props
+
 watch(() => props.upgrades, checkAchievements, { deep: true })
 watch(() => props.cookies, checkAchievements)
 watch(() => props.totalClicks, checkAchievements)

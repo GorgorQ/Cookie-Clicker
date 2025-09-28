@@ -70,16 +70,9 @@ const currentUpgrades = ref([])
 const connectionRef = ref(null)
 const displayNameRef = ref(null)
 
-// Ajouter une ref pour les achievements
 const currentAchievements = ref([])
-
-// Variable pour déclencher le reset des achievements
 const resetTrigger = ref(0)
-
-// Variable pour forcer la réactivité du nom d'affichage
 const displayNameTrigger = ref(0)
-
-// Fonction pour formater les grands nombres
 const formatNumber = (num) => {
   if (num >= 1000000000000) return (num / 1000000000000).toFixed(1) + 'T'
   if (num >= 1000000000) return (num / 1000000000).toFixed(1) + 'B'
@@ -88,14 +81,12 @@ const formatNumber = (num) => {
   return Math.floor(num).toString()
 }
 
-// Fonction pour mettre à jour le titre de l'onglet
 const updatePageTitle = () => {
   const cookieCount = formatNumber(count.value)
   const cps = cookiesPerSecond.value > 0 ? ` | ${formatNumber(cookiesPerSecond.value)}/s` : ''
   document.title = `${cookieCount}${cps}`
 }
 
-// Fonction pour sauvegarder dans le localStorage
 const saveToLocalStorage = () => {
   const gameData = {
     cookies: count.value,
@@ -108,7 +99,6 @@ const saveToLocalStorage = () => {
   localStorage.setItem('cookieClickerSave', JSON.stringify(gameData))
 }
 
-// Fonction pour charger depuis le localStorage
 const loadFromLocalStorage = () => {
   const savedData = localStorage.getItem('cookieClickerSave')
   if (savedData) {
@@ -152,13 +142,11 @@ const loadUserData = (gameData) => {
   currentUpgrades.value = gameData.upgrades || []
   currentAchievements.value = gameData.achievements || []
   
-  // Mettre à jour le titre après le chargement
   setTimeout(() => updatePageTitle(), 100)
   
   console.log('User data loaded successfully')
 }
 
-// Fonction pour obtenir les upgrades par défaut
 const getDefaultUpgrades = () => [
   {
     id: 1,
@@ -252,27 +240,19 @@ const getDefaultUpgrades = () => [
   }
 ]
 
-// Fonction pour remettre le jeu à zéro lors de la déconnexion
 const resetGameToDefault = () => {
   count.value = 0
   totalClicks.value = 0
   cookiesPerSecond.value = 0  
-  currentUpgrades.value = getDefaultUpgrades() // Utiliser les upgrades par défaut
+  currentUpgrades.value = getDefaultUpgrades()
   currentAchievements.value = []
-  
-  // Déclencher le reset des achievements
   resetTrigger.value++
-  
-  // Mettre à jour le titre de l'onglet
   updatePageTitle()
-  
-  // Effacer aussi le localStorage pour éviter les conflits
   localStorage.removeItem('cookieClickerSave')
   
   console.log('Game reset to default state after disconnection')
 }
 
-// Nouvelle fonction pour gérer l'import de sauvegarde
 const handleLoadSaveData = (saveData) => {
   count.value = saveData.cookies || 0
   totalClicks.value = saveData.totalClicks || 0
@@ -280,10 +260,7 @@ const handleLoadSaveData = (saveData) => {
   currentUpgrades.value = saveData.upgrades || []
   currentAchievements.value = saveData.achievements || []
   
-  // Sauvegarder dans le localStorage
   saveToLocalStorage()
-  
-  // Sauvegarder les nouvelles données pour l'utilisateur connecté
   if (connectionRef.value?.isConnected) {
     connectionRef.value.saveUserGameData()
   }
@@ -291,25 +268,18 @@ const handleLoadSaveData = (saveData) => {
   console.log('Save data loaded from Options:', saveData)
 }
 
-// Fonction pour effacer la sauvegarde
 const handleClearSaveData = (emptyData) => {
-  // Utiliser la même logique que resetGameToDefault pour un reset complet
   count.value = 0
   totalClicks.value = 0
   cookiesPerSecond.value = 0  
-  currentUpgrades.value = getDefaultUpgrades() // Utiliser les upgrades par défaut
+  currentUpgrades.value = getDefaultUpgrades()
   currentAchievements.value = []
   
-  // Déclencher le reset des achievements
   resetTrigger.value++
   
-  // Mettre à jour le titre de l'onglet
   updatePageTitle()
   
-  // Effacer aussi le localStorage
   localStorage.removeItem('cookieClickerSave')
-  
-  // Sauvegarder les données vides
   if (connectionRef.value?.isConnected) {
     connectionRef.value.saveUserGameData()
   }
@@ -317,12 +287,10 @@ const handleClearSaveData = (emptyData) => {
   console.log('Save data cleared completely')
 }
 
-// Fonction pour déclencher la mise à jour du nom d'affichage
 const refreshDisplayName = () => {
   displayNameTrigger.value++
 }
 
-// Computed pour les données de jeu actuelles
 const currentGameData = computed(() => ({
   cookies: count.value,
   totalClicks: totalClicks.value,
@@ -332,19 +300,13 @@ const currentGameData = computed(() => ({
   lastSaved: new Date().toISOString()
 }))
 
-// Computed pour le nom d'affichage
 const currentDisplayName = computed(() => {
-  // Utiliser le trigger pour forcer la réactivité
   displayNameTrigger.value
-  
-  // Toujours vérifier localStorage en premier pour la cohérence
   const saved = localStorage.getItem('cookieClicker_displayName')
   if (saved && saved.trim()) {
     console.log('currentDisplayName: using saved name:', saved.trim())
     return saved.trim()
   }
-  
-  // Fallback approprié selon le statut de connexion
   const fallbackName = (connectionRef.value?.isConnected && connectionRef.value?.username) ? connectionRef.value.username : 'Guest'
   console.log('currentDisplayName: using fallback:', fallbackName)
   return fallbackName
@@ -355,54 +317,38 @@ const saveTimeout = ref(null)
 const dbSaveTimeout = ref(null)
 const isMounted = ref(false)
 
-// Mettre à jour le titre de l'onglet quand les cookies changent
 watch([count, cookiesPerSecond], () => {
   if (isMounted.value) {
     updatePageTitle()
   }
 })
 
-// Sauvegarder automatiquement quand les cookies changent
 watch([count, totalClicks, cookiesPerSecond, currentUpgrades, currentAchievements], () => {
-  // Ne sauvegarder que si le composant est monté
   if (!isMounted.value) return
-  
-  // Toujours sauvegarder dans le localStorage
   clearTimeout(saveTimeout.value)
   saveTimeout.value = setTimeout(() => {
     saveToLocalStorage()
-  }, 500) // Sauvegarder 0.5 seconde après le dernier changement
-  
-  // Aussi sauvegarder dans la base de données si connecté
+  }, 500)
   if (connectionRef.value?.isConnected) {
     clearTimeout(dbSaveTimeout.value)
     dbSaveTimeout.value = setTimeout(() => {
       connectionRef.value.saveUserGameData()
-    }, 1000) // Sauvegarder 1 seconde après le dernier changement
+    }, 1000)
   }
 }, { deep: true })
 
 onMounted(() => {
-  // Marquer le composant comme monté
   isMounted.value = true
-  
-  // Mettre à jour le titre initial
   updatePageTitle()
-  
-  // Charger les données depuis le localStorage seulement si pas d'utilisateur connecté
   setTimeout(() => {
-    // Si aucun utilisateur n'est connecté, charger le localStorage
     if (!connectionRef.value?.isConnected) {
       loadFromLocalStorage()
     }
-    // Sinon, les données seront chargées par Connection.vue via loadUserGameData
     
-    // Mettre à jour le titre après le chargement des données
     updatePageTitle()
-  }, 300) // Délai suffisant pour laisser Connection.vue gérer la connexion
+  }, 300)
   
   window.addEventListener('beforeunload', () => {
-    // Sauvegarder avant de quitter la page
     saveToLocalStorage()
     if (connectionRef.value?.isConnected) {
       connectionRef.value.saveUserGameData()
@@ -412,12 +358,9 @@ onMounted(() => {
   interval = setInterval(() => {
     count.value += cookiesPerSecond.value
     
-    // Sauvegarder toutes les 10 secondes dans le localStorage
     if (Date.now() % 10000 < 1000) {
       saveToLocalStorage()
     }
-    
-    // Sauvegarder toutes les 10 secondes si connecté
     if (Date.now() % 10000 < 1000 && connectionRef.value?.isConnected) {
       connectionRef.value.saveUserGameData()
     }
@@ -473,7 +416,7 @@ html, body, #app {
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   
-  /* Effet de halo doré plus doux */
+
   filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.4))
           drop-shadow(0 0 30px rgba(255, 215, 0, 0.3))
           drop-shadow(0 0 45px rgba(255, 193, 77, 0.2))
@@ -540,7 +483,7 @@ html, body, #app {
   min-width: 0;
   padding: 20px;
 
-  padding-top: 120px; /* Décalage général vers le bas */
+  padding-top: 120px;
 }
 
 </style>

@@ -108,16 +108,16 @@ const signupData = ref({
   password: ''
 })
 
-// Props pour recevoir les données du jeu depuis App.vue
+
 const props = defineProps(['cookies', 'upgrades', 'achievements', 'totalClicks', 'cps'])
 const emit = defineEmits(['load-user-data', 'user-disconnected'])
 
-// Charger les données au démarrage
+
 onMounted(async () => {
   await loadUsersFromJSON()
   loadCurrentUser()
   
-  // Charger les données invité si pas connecté
+
   const guestData = localStorage.getItem('cookieClicker_guestData')
   if (guestData && !connectionRef.value?.isConnected) {
     try {
@@ -142,7 +142,7 @@ const canSignup = computed(() => {
   return signupData.value.username.trim() && signupData.value.password.trim()
 })
 
-// Charger les utilisateurs depuis le fichier JSON
+
 const loadUsersFromJSON = async () => {
   try {
     const response = await fetch('/users.json')
@@ -155,15 +155,15 @@ const loadUsersFromJSON = async () => {
   }
 }
 
-// Sauvegarder les utilisateurs (sans téléchargement automatique)
+
 const saveUsersToStorage = () => {
-  // Sauvegarder dans localStorage comme backup
+
   localStorage.setItem('cookieClicker_users_backup', JSON.stringify(users.value))
   
   console.log('Users data updated and saved to localStorage backup')
 }
 
-// Fonction manuelle pour télécharger le JSON (optionnelle)
+
 const downloadUpdatedJSON = () => {
   const blob = new Blob([JSON.stringify({ users: users.value }, null, 2)], {
     type: 'application/json'
@@ -259,7 +259,7 @@ const signin = () => {
   resetForms()
   
   setTimeout(() => {
-    loadUserGameData(true) // true = première connexion
+    loadUserGameData(true)
   }, 100)
   
   console.log('Signed in as', username.value)
@@ -302,16 +302,16 @@ const resetForms = () => {
 
 const toggleConnection = () => {
   if (isConnected.value) {
-    // Sauvegarder avant déconnexion
+
     saveUserGameData()
     
-    // Attendre un peu pour que la sauvegarde se fasse
+
     setTimeout(() => {
       isConnected.value = false
       username.value = ''
       removeCurrentUser()
       
-      // Émettre l'événement de déconnexion pour remettre le jeu à zéro
+
       emit('user-disconnected')
       
       console.log('Disconnected and data saved')
@@ -345,7 +345,7 @@ const saveUserGameData = () => {
 const loadUserGameData = (isFirstConnection = false) => {
   if (!isConnected.value) return
   
-  // Si c'est une première connexion, charger depuis le JSON
+
   if (isFirstConnection) {
     const user = users.value.find(user => user.username === username.value)
     
@@ -356,13 +356,13 @@ const loadUserGameData = (isFirstConnection = false) => {
     }
   }
   
-  // Sinon (refresh/rechargement), vérifier d'abord le localStorage
+
   const localStorageData = localStorage.getItem('cookieClickerSave')
   
   if (localStorageData) {
     try {
       const gameData = JSON.parse(localStorageData)
-      // Prioriser les données du localStorage qui sont plus récentes
+
       emit('load-user-data', gameData)
       console.log('Game data loaded from localStorage for connected user:', username.value, gameData)
       return
@@ -371,7 +371,7 @@ const loadUserGameData = (isFirstConnection = false) => {
     }
   }
   
-  // Si pas de localStorage ou erreur, charger depuis le JSON
+
   const user = users.value.find(user => user.username === username.value)
   
   if (user && user.gameData) {
