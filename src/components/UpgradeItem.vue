@@ -7,7 +7,11 @@
       <h3>{{ name }}</h3>
       <p>{{ description }}</p>
       <div class="upgrade-stats">
-        <span class="price">💰 {{ formatPrice(price) }}</span>      </div>
+        <span class="price">
+          <img src="../assets/image.png" alt="Cookie" class="price-cookie-icon">
+          {{ formatPrice(price) }}
+        </span>
+      </div>
     </div>
     <div class="upgrade-count" v-if="owned > 0">
       <span class="count-number">{{ owned }}</span>
@@ -153,6 +157,15 @@ const formatCps = () => {
   background: #f6f8fa;
   border-radius: 4px;
   border: 1px solid #e1e5e9;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.price-cookie-icon {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
 }
 
 .cps {

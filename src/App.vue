@@ -43,12 +43,22 @@
     <section class="center">
       <div class="cookies-stats">
         <p>Number of cookies {{ formatNumber(count) }}</p>
-        <p>Cookies per second: {{ formatNumber(cookiesPerSecond) }}</p>
+        <p>Cookies per second: {{ formatNumber(cookiesPerSecond) }}</p>      </div>
+      <div class="cookie-container">
+        <img class="cookie-btn" src="./assets/image.png" @click="handleCookieClick" alt="Cookie">
+      
+        <div 
+          v-for="floatingNumber in floatingNumbers" 
+          :key="floatingNumber.id"
+          class="floating-number"
+          :style="{ left: floatingNumber.x + 'px', top: floatingNumber.y + 'px' }"
+        >
+          +{{ floatingNumber.value }}
+        </div>
       </div>
-      <img class="cookie-btn" src="./assets/image.png" @click="handleCookieClick" alt="Cookie">
     </section>
     <section class="right">
-      <Upgrades :cookies="count" :savedUpgrades="currentUpgrades" @buy-upgrade="buyUpgrade" @cps-update="updateCps" @upgrades-update="updateUpgrades" />
+      <Upgrades :cookies="count" :savedUpgrades="currentUpgrades" @buy-upgrade="buyUpgrade" @buy-bonus="buyBonus" @cps-update="updateCps" @upgrades-update="updateUpgrades" />
     </section>
   </div>
 </template>
@@ -73,12 +83,80 @@ const displayNameRef = ref(null)
 const currentAchievements = ref([])
 const resetTrigger = ref(0)
 const displayNameTrigger = ref(0)
+const floatingNumbers = ref([])
+
+// Calcul des cookies par clic
+const cookiesPerClick = computed(() => {
+  let baseClick = 1
+  let clickBonus = 0
+  let totalUpgrades = 0
+  
+  // Bonus basé sur chaque type d'upgrade 
+  currentUpgrades.value.forEach(upgrade => {
+    if (upgrade.owned > 0) {
+      totalUpgrades += upgrade.owned
+      
+      // Pourcentages différents selon le type d'upgrade
+      let bonusPercentage = 0
+      switch(upgrade.name) {
+        case "Cursor":
+          bonusPercentage = 0.15 
+          break
+        case "Grandma":
+          bonusPercentage = 0.12 
+          break
+        case "Farm":
+          bonusPercentage = 0.08 
+          break
+        case "Mine":
+          bonusPercentage = 0.06 
+          break
+        case "Factory":
+          bonusPercentage = 0.05
+          break
+        case "Bank":
+          bonusPercentage = 0.04
+          break
+        case "Temple":
+          bonusPercentage = 0.03
+          break
+        case "Wizard Tower":
+          bonusPercentage = 0.025
+          break
+        default:
+          bonusPercentage = 0.02 
+      }
+      
+      clickBonus += upgrade.owned * upgrade.cps * bonusPercentage
+    }
+  })
+  
+  // Bonus global basé sur le nombre total d'upgrades 
+  const globalBonus = baseClick * totalUpgrades * 0.01
+  
+  // Bonus multiplicateur des achievements de clic 
+  let clickMultiplier = 1
+  if (totalClicks.value >= 500) clickMultiplier += 0.25 // +25% après 500 clics
+  if (totalClicks.value >= 1000) clickMultiplier += 0.5 // +75% total après 1000 clics
+  if (totalClicks.value >= 5000) clickMultiplier += 0.75 // +150% total après 5000 clics
+  if (totalClicks.value >= 10000) clickMultiplier += 1 // +250% total après 10000 clics
+  
+  return Math.max(1, (baseClick + clickBonus + globalBonus) * clickMultiplier)
+})
 const formatNumber = (num) => {
   if (num >= 1000000000000) return (num / 1000000000000).toFixed(1) + 'T'
   if (num >= 1000000000) return (num / 1000000000).toFixed(1) + 'B'
   if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M'
   if (num >= 1000) return (num / 1000).toFixed(1) + 'K'
   return Math.floor(num).toString()
+}
+
+const formatNumberWithDecimals = (num) => {
+  if (num >= 1000000000000) return (num / 1000000000000).toFixed(2) + 'T'
+  if (num >= 1000000000) return (num / 1000000000).toFixed(2) + 'B'
+  if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M'
+  if (num >= 1000) return (num / 1000).toFixed(2) + 'K'
+  return num.toFixed(2)
 }
 
 const updatePageTitle = () => {
@@ -116,12 +194,36 @@ const loadFromLocalStorage = () => {
   }
 }
 
-const handleCookieClick = () => {
-  count.value++
+const handleCookieClick = (event) => {
+  const cookiesGained = cookiesPerClick.value
+  count.value += cookiesGained
   totalClicks.value++
+  createFloatingNumber(event || window.event, cookiesGained)
+}
+
+const createFloatingNumber = (event, cookiesGained = 1) => {
+  const floatingNumber = {
+    id: Date.now() + Math.random(),
+    value: formatNumberWithDecimals(cookiesGained), 
+    x: event.clientX,
+    y: event.clientY
+  }
+  
+  floatingNumbers.value.push(floatingNumber)
+  
+  setTimeout(() => {
+    const index = floatingNumbers.value.findIndex(fn => fn.id === floatingNumber.id)
+    if (index > -1) {
+      floatingNumbers.value.splice(index, 1)
+    }
+  }, 2000)
 }
 
 const buyUpgrade = (cost) => {
+  count.value -= cost
+}
+
+const buyBonus = (cost) => {
   count.value -= cost
 }
 
@@ -404,8 +506,21 @@ html, body, #app {
   gap: 50px;
   padding-top: 3%;
 }
+
+.cookie-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .cookies-stats {
   text-align: center;
+}
+
+.cookies-per-click {
+  color: #28a745;
+  font-weight: bold;
+  font-size: 16px;
 }
 .cookie-btn {
   width: 350px;
@@ -474,6 +589,32 @@ html, body, #app {
   display: none; 
 }
 
+.floating-number {
+  position: fixed;
+  color: #ffc107;
+  font-weight: bold;
+  font-size: 24px;
+  pointer-events: none;
+  z-index: 1000;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  animation: floatUp 2s ease-out forwards;
+}
+
+@keyframes floatUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-50px) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100px) scale(0.8);
+  }
+}
+
 .left {
   flex: 1;
   display: flex;
@@ -482,7 +623,6 @@ html, body, #app {
   justify-content: flex-start;
   min-width: 0;
   padding: 20px;
-
   padding-top: 120px;
 }
 
