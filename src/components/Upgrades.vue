@@ -393,14 +393,14 @@ const hideTooltip = () => {
   margin-top: 8px;
   background: rgba(0, 0, 0, 0.95);
   color: white;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 12px;
+  padding: 28px;
+  border-radius: 16px;
+  font-size: 16px;
   text-align: left;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.2);
   z-index: 1000;
-  min-width: 200px;
+  min-width: 350px;
   animation: tooltipSlideIn 0.2s ease-out;
 }
 
@@ -433,6 +433,7 @@ const hideTooltip = () => {
   margin-bottom: 6px;
   font-style: italic;
   color: rgba(255, 255, 255, 0.8);
+  
 }
 
 .tooltip-price {
